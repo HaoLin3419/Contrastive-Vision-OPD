@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="CV-OPD: Contrastive Vision On-Policy Distillation for evidence-grounded multimodal reasoning."
+    />
+    <title>CV-OPD — Contrastive Vision On-Policy Distillation</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+
+  <body>
+    <div class="page-shell">
+      <header class="site-header">
+        <a class="brand" href="#top" aria-label="CV-OPD home">
+          <span class="brand-mark">CV</span>
+          <span>CV-OPD</span>
+        </a>
+        <button class="menu-toggle" aria-label="Open navigation" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <nav class="nav-links" aria-label="Primary navigation">
+          <a href="#problem">Motivation</a>
+          <a href="#method">Method</a>
+          <a href="#story">Story</a>
+          <a href="#resources">Resources</a>
+        </nav>
+        <a class="header-cta" href="#resources">View project</a>
+      </header>
+
+      <main id="top">
+        <section class="hero section-grid">
+          <div class="hero-copy">
+            <div class="eyebrow"><span class="pulse-dot"></span> ICLR 2027 submission</div>
+            <h1>Teach vision-language models to <em>look</em> before they answer.</h1>
+            <p class="hero-lede">
+              CV-OPD introduces contrastive visual supervision to on-policy distillation, helping
+              multimodal language models distinguish answer-relevant evidence from misleading
+              visual cues.
+            </p>
+            <div class="hero-actions">
+              <a class="button button-primary" href="#method">Explore the method <span>↗</span></a>
+              <a class="button button-secondary" href="CV_OPD_Contrastive_Vision_OPD_ICLR_27.pdf" target="_blank" rel="noreferrer">
+                Read the paper <span>↗</span>
+              </a>
+            </div>
+            <div class="hero-meta">
+              <span>Contrastive Vision On-Policy Distillation</span>
+              <span class="meta-divider"></span>
+              <span>student policy</span>
+              <span class="meta-divider"></span>
+              <span>evidence-grounded visual reasoning</span>
+            </div>
+          </div>
+
+          <div class="hero-visual" aria-label="Conceptual visual evidence illustration">
+            <div class="orbit orbit-one"></div>
+            <div class="orbit orbit-two"></div>
+            <div class="visual-card visual-card-main">
+              <div class="card-kicker">visual evidence</div>
+              <div class="scene">
+                <div class="scene-sun"></div>
+                <div class="scene-hill hill-back"></div>
+                <div class="scene-hill hill-front"></div>
+                <div class="scene-tree tree-left"><span></span><i></i></div>
+                <div class="scene-tree tree-right"><span></span><i></i></div>
+                <div class="scene-person"><span></span><i></i><b></b></div>
+                <div class="evidence-box"><span>relevant region</span></div>
+              </div>
+              <div class="visual-caption">
+                <span>Positive crop</span>
+                <strong>grounded signal</strong>
+              </div>
+            </div>
+            <div class="visual-card visual-card-negative">
+              <div class="card-kicker">negative teacher</div>
+              <div class="noise-grid">
+                <span></span><span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span><span></span>
+                <span></span><span></span><span></span><span></span><span></span><span></span>
+              </div>
+              <div class="visual-caption">
+                <span>Random crop</span>
+                <strong>irrelevant cue</strong>
+              </div>
+            </div>
+            <div class="floating-chip chip-cdl"><span>01</span> CDL</div>
+            <div class="floating-chip chip-dag"><span>02</span> DAG</div>
+            <div class="arrow-line arrow-left"></div>
+            <div class="arrow-line arrow-right"></div>
+          </div>
+        </section>
+
+        <section id="problem" class="content-section section-grid">
+          <div class="section-intro">
+            <div class="section-number">01 / Motivation</div>
+            <h2>Correct answers can still be <span>ungrounded.</span></h2>
+            <p>
+              Existing vision-language on-policy distillation gives the teacher privileged access
+              to answer-related image regions. That improves accuracy, but can also teach a shortcut:
+              reproduce the answer without learning to rely on the visual evidence.
+            </p>
+          </div>
+
+          <div class="problem-panel">
+            <div class="panel-label">Diagnostic observation</div>
+            <div class="evidence-comparison">
+              <div class="evidence-state">
+                <div class="mini-image mini-image-normal">
+                  <div class="mini-sun"></div><div class="mini-hill"></div><div class="mini-object"></div>
+                </div>
+                <span>Full evidence</span>
+                <strong class="good-text">Correct answer</strong>
+              </div>
+              <div class="comparison-symbol">→</div>
+              <div class="evidence-state">
+                <div class="mini-image mini-image-masked">
+                  <div class="mask-block"></div><div class="mini-hill"></div><div class="mini-object faded"></div>
+                </div>
+                <span>Relevant region masked</span>
+                <strong class="bad-text">Still correct</strong>
+              </div>
+            </div>
+            <div class="quote-box">
+              <span class="quote-mark">“</span>
+              <p>Answer accuracy is not enough. A grounded model must change its answer when the evidence changes.</p>
+            </div>
+          </div>
+        </section>
+
+        <section id="method" class="content-section method-section">
+          <div class="section-intro centered-intro">
+            <div class="section-number">02 / Method</div>
+            <h2>Contrast the evidence.<br /><span>Ground the reasoning.</span></h2>
+            <p>
+              CV-OPD keeps the original on-policy trajectory, then adds a negative teacher
+              conditioned on an unrelated crop from the same image.
+            </p>
+          </div>
+
+          <div class="pipeline-demo" data-step="0">
+            <div class="pipeline-demo-top">
+              <div>
+                <div class="diagram-eyebrow"><span class="diagram-live-dot"></span> Watch the visual evidence move through the model</div>
+                <h3>One image. Two views. A more grounded policy.</h3>
+              </div>
+              <div class="diagram-controls" aria-label="Pipeline animation controls">
+                <button class="diagram-control diagram-play" type="button" aria-label="Pause animation" title="Pause animation">Ⅱ</button>
+                <button class="diagram-control diagram-restart" type="button" aria-label="Restart animation">↺</button>
+              </div>
+            </div>
+            <div class="diagram-scroll" tabindex="0" aria-label="Scrollable CV-OPD pipeline diagram">
+              <svg class="pipeline-diagram" viewBox="0 0 1200 710" role="img" aria-labelledby="diagram-title diagram-desc">
+                <title id="diagram-title">CV-OPD contrastive on-policy distillation pipeline</title>
+                <desc id="diagram-desc">A student samples answers from a full image. Positive and negative crop-conditioned teachers evaluate the same student prefixes. Contrastive divergence and discrepancy-aware gates select supervision to update the student.</desc>
+                <defs>
+                  <linearGradient id="imgSky" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0" stop-color="#b9ebe2" />
+                    <stop offset="0.62" stop-color="#e7f0d6" />
+                    <stop offset="0.63" stop-color="#edc38e" />
+                    <stop offset="1" stop-color="#dfa875" />
+                  </linearGradient>
+                  <linearGradient id="tealCard" x1="0" x2="1">
+                    <stop stop-color="#e6f8f3" />
+                    <stop offset="1" stop-color="#f4fbf8" />
+                  </linearGradient>
+                  <linearGradient id="coralCard" x1="0" x2="1">
+                    <stop stop-color="#fff0e9" />
+                    <stop offset="1" stop-color="#fff8f4" />
+                  </linearGradient>
+                  <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="150%">
+                    <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#193047" flood-opacity=".09" />
+                  </filter>
+                  <marker id="arrowInk" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                    <path d="M0 0L10 5L0 10Z" fill="#93a4a8" />
+                  </marker>
+                  <marker id="arrowTeal" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                    <path d="M0 0L10 5L0 10Z" fill="#00a98f" />
+                  </marker>
+                  <marker id="arrowCoral" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+                    <path d="M0 0L10 5L0 10Z" fill="#f07661" />
+                  </marker>
+                  <pattern id="noisePattern" width="16" height="16" patternUnits="userSpaceOnUse">
+                    <rect width="16" height="16" fill="#f5e9df" />
+                    <path d="M0 0h7v7H0zM9 1h6v5H9zM3 10h5v6H3zM10 9h6v7h-6z" fill="#e39b79" opacity=".58" />
+                    <path d="M7 0h2v16H7zM0 7h16v2H0z" fill="#8d9fc0" opacity=".46" />
+                  </pattern>
+                </defs>
+
+                <rect class="diagram-bg" x="1" y="1" width="1198" height="708" rx="24" />
+                <path class="diagram-grid" d="M0 118H1200M0 350H1200M0 582H1200" />
+
+                <g class="diagram-stage stage-rollout" data-stage="0">
+                  <text x="34" y="43" class="svg-kicker">01 · ON-POLICY ROLLOUT</text>
+                  <text x="34" y="67" class="svg-caption">The student samples its own trajectories from the original image.</text>
+                  <rect class="svg-card input-card" x="34" y="91" width="224" height="242" rx="18" filter="url(#cardShadow)" />
+                  <text x="53" y="119" class="svg-card-kicker">FULL IMAGE + QUESTION</text>
+                  <rect x="52" y="133" width="188" height="118" rx="11" fill="url(#imgSky)" />
+                  <circle cx="203" cy="158" r="15" fill="#ffc367" />
+                  <path d="M52 216Q103 183 148 211T240 205V251H52Z" fill="#74b09a" />
+                  <path d="M52 226Q105 205 157 225T240 218V251H52Z" fill="#328b77" />
+                  <path d="M84 215v-34m0 9-14-17m14 23 14-20" stroke="#76513c" stroke-width="5" stroke-linecap="round" />
+                  <circle cx="84" cy="171" r="13" fill="#377e65" />
+                  <circle cx="97" cy="179" r="11" fill="#59a47d" />
+                  <circle cx="178" cy="206" r="7" fill="#55423b" />
+                  <path d="M172 214h13l7 24h-25z" fill="#f07661" />
+                  <path d="M174 235v12m8-12v12" stroke="#273d55" stroke-width="4" stroke-linecap="round" />
+                  <rect x="164" y="193" width="34" height="51" rx="4" class="positive-crop-box" />
+                  <rect x="71" y="146" width="44" height="48" rx="4" class="negative-crop-box" />
+                  <text x="52" y="272" class="svg-small">Q: What is the person wearing?</text>
+                  <rect x="52" y="286" width="188" height="28" rx="8" fill="#f0f4f3" />
+                  <text x="65" y="305" class="svg-answer">Student prefix: “The person is…”</text>
+
+                  <path class="flow-line flow-neutral" d="M258 210H299" marker-end="url(#arrowInk)" />
+                  <rect class="rollout-pill" x="302" y="174" width="145" height="72" rx="15" />
+                  <text x="374" y="199" text-anchor="middle" class="svg-card-kicker">FROZEN ROLLOUT</text>
+                  <text x="374" y="222" text-anchor="middle" class="svg-body">M answer paths</text>
+                  <path class="flow-line flow-neutral" d="M447 210H474V137H498" marker-end="url(#arrowInk)" />
+                  <path class="flow-line flow-neutral" d="M474 210V283H498" marker-end="url(#arrowInk)" />
+                  <circle class="flow-particle particle-neutral" r="5"><animateMotion dur="2.2s" repeatCount="indefinite" path="M258 210H299" /></circle>
+                  <circle class="flow-particle particle-neutral" r="5"><animateMotion dur="2.7s" repeatCount="indefinite" path="M447 210H474V137H498" /></circle>
+
+                  <rect class="svg-card student-card" x="498" y="99" width="206" height="92" rx="16" filter="url(#cardShadow)" />
+                  <circle cx="532" cy="132" r="17" fill="#111b2d" />
+                  <path d="M524 133h16m-8-8v16" stroke="#a4eee0" stroke-width="2" />
+                  <text x="559" y="128" class="svg-card-kicker">STUDENT POLICY</text>
+                  <text x="559" y="151" class="svg-body">student policy</text>
+                  <text x="518" y="174" class="svg-small">Full image · on-policy prefixes</text>
+                  <rect class="svg-card rollout-card" x="498" y="238" width="206" height="90" rx="16" />
+                  <text x="518" y="265" class="svg-card-kicker">SAMPLED RESPONSE</text>
+                  <text x="518" y="291" class="svg-body">“...wearing a red coat.”</text>
+                  <text x="518" y="312" class="svg-small">Same prefix sent to both teachers</text>
+
+                  <path class="flow-line flow-neutral" d="M704 145H731V210H761" marker-end="url(#arrowInk)" />
+                  <path class="flow-line flow-neutral" d="M704 283H731V210" />
+                  <rect class="ema-card" x="764" y="164" width="163" height="93" rx="17" />
+                  <text x="845" y="191" text-anchor="middle" class="svg-card-kicker">SHARED EMA</text>
+                  <text x="845" y="216" text-anchor="middle" class="svg-body">Teacher weights</text>
+                  <text x="845" y="238" text-anchor="middle" class="svg-small">same prefix · two views</text>
+                  <path class="flow-line flow-neutral" d="M927 210H950V137H974" marker-end="url(#arrowInk)" />
+                  <path class="flow-line flow-neutral" d="M950 210V283H974" marker-end="url(#arrowInk)" />
+                  <circle class="flow-particle particle-neutral" r="5"><animateMotion dur="2.5s" repeatCount="indefinite" path="M927 210H950V137H974" /></circle>
+
+                  <rect class="crop-card crop-positive-card" x="976" y="101" width="188" height="87" rx="15" />
+                  <rect x="991" y="117" width="51" height="51" rx="9" fill="url(#imgSky)" />
+                  <path d="M991 153q25-15 51-3v19h-51z" fill="#328b77" />
+                  <path d="M1015 143h12l6 22h-24z" fill="#f07661" />
+                  <text x="1053" y="131" class="svg-card-kicker">POSITIVE CROP</text>
+                  <text x="1053" y="153" class="svg-body">Answer-related</text>
+                  <text x="1053" y="171" class="svg-small">high evidence</text>
+                  <rect class="crop-card crop-negative-card" x="976" y="239" width="188" height="87" rx="15" />
+                  <rect x="991" y="255" width="51" height="51" rx="9" fill="url(#noisePattern)" />
+                  <text x="1053" y="269" class="svg-card-kicker">NEGATIVE CROP</text>
+                  <text x="1053" y="291" class="svg-body">Random region</text>
+                  <text x="1053" y="309" class="svg-small">low overlap · irrelevant</text>
+                  <text x="34" y="373" class="svg-note">The two teacher branches share model weights and student prefixes; only the visual crop changes.</text>
+                </g>
+
+                <g class="diagram-stage stage-contrast" data-stage="1">
+                  <text x="34" y="416" class="svg-kicker">02 · CONTRASTIVE SUPERVISION</text>
+                  <text x="34" y="440" class="svg-caption">Let the useful visual cue light up. Let the unrelated cue fade.</text>
+                  <rect class="dist-card positive-dist" x="34" y="468" width="325" height="190" rx="18" filter="url(#cardShadow)" />
+                  <text x="57" y="497" class="svg-card-kicker">ILLUSTRATIVE TOKEN DISTRIBUTION  π⁺</text>
+                  <text x="57" y="526" class="svg-body">“red”</text><text x="334" y="526" text-anchor="end" class="svg-value">strong signal</text>
+                  <rect x="57" y="537" width="277" height="9" rx="5" fill="#e8edeb" /><rect class="bar-positive" x="57" y="537" width="216" height="9" rx="5" />
+                  <text x="57" y="573" class="svg-body">“blue”</text><text x="334" y="573" text-anchor="end" class="svg-value">weak signal</text>
+                  <rect x="57" y="584" width="277" height="9" rx="5" fill="#e8edeb" /><rect x="57" y="584" width="22" height="9" rx="5" fill="#9fcec3" />
+                  <text x="57" y="626" class="svg-small">The useful clue brightens the matching word.</text>
+
+                  <rect class="dist-card negative-dist" x="34" y="468" width="325" height="190" rx="18" filter="url(#cardShadow)" />
+                  <text x="57" y="497" class="svg-card-kicker">ILLUSTRATIVE TOKEN DISTRIBUTION  π⁻</text>
+                  <text x="57" y="526" class="svg-body">“red”</text><text x="334" y="526" text-anchor="end" class="svg-value">weak signal</text>
+                  <rect x="57" y="537" width="277" height="9" rx="5" fill="#f0e9e5" /><rect class="bar-negative" x="57" y="537" width="36" height="9" rx="5" />
+                  <text x="57" y="573" class="svg-body">“blue”</text><text x="334" y="573" text-anchor="end" class="svg-value">strong signal</text>
+                  <rect x="57" y="584" width="277" height="9" rx="5" fill="#f0e9e5" /><rect x="57" y="584" width="169" height="9" rx="5" fill="#f0aa90" />
+                  <text x="57" y="626" class="svg-small">The unrelated view cannot explain the answer.</text>
+
+                  <path class="flow-line flow-positive" d="M359 530H397" marker-end="url(#arrowTeal)" />
+                  <path class="flow-line flow-negative" d="M359 603H397" marker-end="url(#arrowCoral)" />
+                  <rect class="loss-card" x="402" y="489" width="249" height="143" rx="19" filter="url(#cardShadow)" />
+                  <text x="526" y="516" text-anchor="middle" class="svg-card-kicker">CONTRASTIVE SIGNAL</text>
+                  <text x="526" y="552" text-anchor="middle" class="svg-action-word">PULL</text>
+                  <text x="526" y="580" text-anchor="middle" class="svg-body">toward useful evidence</text>
+                  <text x="526" y="603" text-anchor="middle" class="svg-body coral-text">away from misleading cues</text>
+
+                  <path class="flow-line flow-teal" d="M651 560H696" marker-end="url(#arrowTeal)" />
+                  <rect class="gate-card" x="701" y="475" width="216" height="170" rx="19" filter="url(#cardShadow)" />
+                  <text x="809" y="502" text-anchor="middle" class="svg-card-kicker">DAG · TWO-LEVEL GATE</text>
+                  <rect x="721" y="520" width="176" height="43" rx="10" fill="#eef4ff" />
+                  <text x="809" y="538" text-anchor="middle" class="svg-small">NOTICE THE DIFFERENCE</text>
+                  <text x="809" y="554" text-anchor="middle" class="svg-body">keep words that react to vision</text>
+                  <rect x="721" y="575" width="176" height="48" rx="10" fill="#fff0e9" />
+                  <text x="809" y="594" text-anchor="middle" class="svg-small">CHECK THE WHOLE ANSWER</text>
+                  <text x="809" y="611" text-anchor="middle" class="svg-body">learn from a promising attempt</text>
+                  <path class="flow-line flow-teal" d="M917 560H958" marker-end="url(#arrowTeal)" />
+                  <rect class="objective-card" x="965" y="489" width="199" height="143" rx="19" filter="url(#cardShadow)" />
+                  <text x="1064" y="516" text-anchor="middle" class="svg-card-kicker">WHAT GETS UPDATED</text>
+                  <text x="1064" y="552" text-anchor="middle" class="svg-action-word teal-word">LOOK HERE</text>
+                  <text x="1064" y="580" text-anchor="middle" class="svg-body">tokens that react to</text>
+                  <text x="1064" y="602" text-anchor="middle" class="svg-body">the visual evidence</text>
+                  <circle class="flow-particle particle-positive" r="5"><animateMotion dur="2.1s" repeatCount="indefinite" path="M359 530H397" /></circle>
+                  <circle class="flow-particle particle-negative" r="5"><animateMotion dur="2.4s" repeatCount="indefinite" path="M359 603H397" /></circle>
+                  <circle class="flow-particle particle-teal" r="5"><animateMotion dur="2.8s" repeatCount="indefinite" path="M917 560H958" /></circle>
+                  <text x="34" y="687" class="svg-note">CDL stops pushing once the margin is satisfied; DAG focuses it on reliable, visually informative positions.</text>
+                </g>
+
+                <g class="diagram-stage stage-update" data-stage="2">
+                  <text x="34" y="416" class="svg-kicker">03 · POLICY UPDATE</text>
+                  <text x="34" y="440" class="svg-caption">The gated contrastive signal improves the student’s use of visual evidence.</text>
+                  <rect class="update-side-card" x="72" y="487" width="255" height="131" rx="20" />
+                  <text x="199" y="520" text-anchor="middle" class="svg-card-kicker">VISUAL EVIDENCE</text>
+                  <text x="199" y="557" text-anchor="middle" class="svg-action-word">same prefix</text>
+                  <text x="199" y="580" text-anchor="middle" class="svg-body">different visual evidence</text>
+                  <text x="199" y="586" text-anchor="middle" class="svg-small">the same prefix, different views</text>
+                  <path class="flow-line flow-teal" d="M327 553H414" marker-end="url(#arrowTeal)" />
+                  <rect class="update-loss-card" x="419" y="487" width="285" height="131" rx="20" />
+                  <text x="561" y="520" text-anchor="middle" class="svg-card-kicker">GATED TRAINING SIGNAL</text>
+                  <text x="561" y="552" text-anchor="middle" class="svg-action-word teal-word">COMPARE</text>
+                  <text x="561" y="580" text-anchor="middle" class="svg-body">keep reliable visual reactions</text>
+                  <text x="561" y="601" text-anchor="middle" class="svg-small">and let irrelevant reactions fade</text>
+                  <path class="flow-line flow-teal" d="M704 553H785" marker-end="url(#arrowTeal)" />
+                  <rect class="updated-student-card" x="791" y="473" width="332" height="159" rx="23" filter="url(#cardShadow)" />
+                  <circle cx="839" cy="522" r="22" fill="#111b2d" />
+                  <path d="M829 522h20m-10-10v20" stroke="#a4eee0" stroke-width="2.5" />
+                  <text x="875" y="515" class="svg-card-kicker">UPDATED STUDENT</text>
+                  <text x="875" y="541" class="svg-body">Evidence-grounded policy</text>
+                  <rect x="815" y="566" width="284" height="43" rx="11" fill="#e8f8f3" />
+                  <text x="957" y="593" text-anchor="middle" class="svg-answer">See it · use it · answer from it</text>
+                  <path class="feedback-loop" d="M957 632V666H199V623" marker-end="url(#arrowTeal)" />
+                  <text x="578" y="661" text-anchor="middle" class="svg-small">on-policy iteration · EMA teacher tracks the updated student</text>
+                  <circle class="flow-particle particle-teal" r="6"><animateMotion dur="3.4s" repeatCount="indefinite" path="M327 553H414" /></circle>
+                  <circle class="flow-particle particle-teal" r="6"><animateMotion dur="3.4s" repeatCount="indefinite" path="M704 553H785" /></circle>
+                </g>
+              </svg>
+            </div>
+            <div class="diagram-bottom">
+              <div class="step-explainer" aria-live="polite">
+                <span class="step-count">STEP 1 / 3</span>
+                <div>
+                  <strong class="step-title">Sample on-policy trajectories</strong>
+                  <p class="step-description">The student sees the full image and generates answer prefixes. Both teacher branches reuse those exact prefixes.</p>
+                </div>
+              </div>
+              <div class="step-dots" role="tablist" aria-label="Choose pipeline step">
+                <button class="step-dot is-active" type="button" role="tab" aria-selected="true" aria-label="Step 1: rollout" data-go-step="0"></button>
+                <button class="step-dot" type="button" role="tab" aria-selected="false" aria-label="Step 2: contrast and gate" data-go-step="1"></button>
+                <button class="step-dot" type="button" role="tab" aria-selected="false" aria-label="Step 3: update student" data-go-step="2"></button>
+              </div>
+              <div class="step-label">AUTO PLAY <span class="auto-indicator"></span></div>
+            </div>
+          </div>
+          <p class="diagram-mobile-hint">← Swipe to explore the full research schematic →</p>
+
+          <div class="method-cards story-cards">
+            <article class="method-card story-card story-card-guess">
+              <div class="method-card-top"><span class="method-tag">BEFORE · THE GUESS</span><span class="method-symbol">?</span></div>
+              <div class="story-visual guess-visual">
+                <span class="story-sun"></span><span class="story-hill"></span><span class="story-person"></span>
+                <span class="guess-orbit"></span><span class="guess-bubble">“red?”</span><span class="guess-spark">✦</span>
+              </div>
+              <h3>A right answer can be a lucky guess.</h3>
+              <p>Hide the clue. If the model still answers the same way, it may not have looked at all.</p>
+            </article>
+            <article class="method-card story-card story-card-compare">
+              <div class="method-card-top"><span class="method-tag">DURING · THE CONTRAST</span><span class="method-symbol">↔</span></div>
+              <div class="story-visual compare-visual">
+                <span class="compare-crop compare-good"><i></i><b>useful clue</b></span>
+                <span class="compare-beam"></span>
+                <span class="compare-crop compare-bad"><i></i><b>random patch</b></span>
+                <span class="compare-token">“red”</span>
+                <span class="compare-particle"></span>
+              </div>
+              <h3>Show what changes—and what doesn’t.</h3>
+              <p>Two teachers see the same question and prefix, but different parts of the image.</p>
+            </article>
+            <article class="method-card story-card story-card-learn">
+              <div class="method-card-top"><span class="method-tag">AFTER · THE INSIGHT</span><span class="method-symbol">✦</span></div>
+              <div class="story-visual learn-visual">
+                <span class="learn-word word-the">The</span><span class="learn-word word-red">red</span><span class="learn-word word-coat">coat</span>
+                <span class="learn-focus"></span><span class="learn-ray"></span><span class="learn-spark">✦</span>
+              </div>
+              <h3>Reward the words that see.</h3>
+              <p>Visual-sensitive words glow; irrelevant ones fade. The student learns to ground its answer.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="story" class="content-section story-section section-grid">
+          <div class="section-intro">
+            <div class="section-number">03 / The idea</div>
+            <h2>Make the model’s attention <span>visible.</span></h2>
+            <p>
+              Instead of presenting a wall of metrics, this page follows one training example from
+              the first visual question to the final grounded response.
+            </p>
+            <div class="story-callout">
+              <strong>Change the crop → change the signal → change the answer.</strong>
+              <span>That is the behavior CV-OPD wants to teach.</span>
+            </div>
+          </div>
+
+          <div class="storyboard-panel">
+            <div class="storyboard-head">
+              <span class="panel-label">A grounded answer changes with the evidence</span>
+              <span class="storyboard-live"><i></i> live example</span>
+            </div>
+            <div class="storyboard-scene">
+              <div class="storyboard-image"><span class="sb-sun"></span><span class="sb-hill"></span><span class="sb-person"></span><span class="sb-crop"></span></div>
+              <div class="storyboard-question">What color is the person wearing?</div>
+              <div class="storyboard-answer answer-one"><small>full evidence</small><strong>“red”</strong></div>
+              <div class="storyboard-answer answer-two"><small>evidence removed</small><strong>“I’m not sure”</strong></div>
+              <div class="storyboard-arrow">→</div>
+            </div>
+            <div class="storyboard-footer"><span>Evidence-sensitive behavior</span><strong>not answer memorization</strong></div>
+          </div>
+        </section>
+
+        <section class="content-section principles-section">
+          <div class="section-intro centered-intro">
+            <div class="section-number">04 / Design principles</div>
+            <h2>Three small ideas.<br /><span>One clearer behavior.</span></h2>
+            <p>CV-OPD turns visual grounding into something the training process can explicitly compare, select, and reinforce.</p>
+          </div>
+          <div class="principles-grid">
+            <div class="principle-card"><span class="principle-icon">◉</span><strong>Same prefix</strong><p>Both teachers judge the same student trajectory.</p></div>
+            <div class="principle-card"><span class="principle-icon">↔</span><strong>Different evidence</strong><p>Only the visual crop changes between the two views.</p></div>
+            <div class="principle-card"><span class="principle-icon">✦</span><strong>Selective learning</strong><p>Useful visual reactions receive the strongest signal.</p></div>
+          </div>
+        </section>
+
+        <section id="resources" class="content-section resources-section">
+          <div class="resource-panel">
+            <div class="resource-copy">
+              <div class="section-number">05 / Resources</div>
+              <h2>Build models that answer from evidence.</h2>
+              <p>
+                Explore the paper and the accompanying training and evaluation code included in
+                this project repository.
+              </p>
+              <div class="resource-actions">
+                <a class="button button-light" href="CV_OPD_Contrastive_Vision_OPD_ICLR_27.pdf" target="_blank" rel="noreferrer">Open paper <span>↗</span></a>
+                <a class="button button-outline-light" href="README.md" target="_blank" rel="noreferrer">Read README <span>↗</span></a>
+              </div>
+            </div>
+            <div class="resource-visual">
+              <div class="resource-grid"></div>
+              <div class="resource-badge">
+                <span class="badge-top">CV-OPD</span>
+                <span class="badge-bottom">evidence × policy</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer class="site-footer">
+        <span>CV-OPD · Contrastive Vision On-Policy Distillation</span>
+        <span>Built for evidence-grounded multimodal reasoning</span>
+      </footer>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
