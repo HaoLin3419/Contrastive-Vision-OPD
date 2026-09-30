@@ -33,7 +33,7 @@
           <a href="#story">Story</a>
           <a href="#resources">Resources</a>
         </nav>
-        <a class="header-cta" href="#resources">View project</a>
+        <a class="header-cta" href="https://github.com/HaoLin3419/Contrastive-Vision-OPD" target="_blank" rel="noreferrer">GitHub ↗</a>
       </header>
 
       <main id="top">
@@ -112,6 +112,13 @@
 
           <div class="problem-panel">
             <div class="panel-label">Diagnostic observation</div>
+            <figure class="paper-reference-card">
+              <img src="paper_assets/figure-diagnostic.jpg" alt="Paper diagnostic showing model behavior under damaged visual evidence" />
+              <figcaption>
+                <span>Paper Figure 2</span>
+                <strong>When the answer survives, the visual shortcut is exposed.</strong>
+              </figcaption>
+            </figure>
             <div class="evidence-comparison">
               <div class="evidence-state">
                 <div class="mini-image mini-image-normal">
@@ -127,6 +134,34 @@
                 </div>
                 <span>Relevant region masked</span>
                 <strong class="bad-text">Still correct</strong>
+              </div>
+            </div>
+            <div class="motivation-switcher" data-motivation="mask">
+              <div class="motivation-switcher-top">
+                <span class="panel-label">Try the paper's shortcut test</span>
+                <div class="motivation-tabs" role="tablist" aria-label="Motivation examples">
+                  <button class="motivation-tab is-active" type="button" data-motivation-tab="mask">Mask</button>
+                  <button class="motivation-tab" type="button" data-motivation-tab="noise">Noise</button>
+                </div>
+              </div>
+              <div class="motivation-stage">
+                <div class="motivation-photo">
+                  <span class="motivation-sun"></span>
+                  <span class="motivation-hill"></span>
+                  <span class="motivation-lock"></span>
+                  <span class="motivation-mask"></span>
+                  <span class="motivation-noise"></span>
+                </div>
+                <div class="motivation-copy">
+                  <span class="motivation-question">What color is the lock?</span>
+                  <span class="motivation-status status-normal">full image → answer</span>
+                  <strong class="motivation-answer">“red”</strong>
+                  <span class="motivation-status status-broken">broken evidence → still “red”</span>
+                </div>
+              </div>
+              <div class="motivation-foot">
+                <span class="motivation-foot-label">The shortcut</span>
+                <strong>The answer survives after its visual reason disappears.</strong>
               </div>
             </div>
             <div class="quote-box">
@@ -341,6 +376,21 @@
                 </g>
               </svg>
             </div>
+            <div class="paper-figure-rail" aria-label="Paper figure references">
+              <figure class="paper-mini-card is-active" data-paper-step="0">
+                <img src="paper_assets/figure-pipeline-a.jpg" alt="Paper pipeline figure reference A" />
+                <figcaption><span>Paper case reference</span><strong>Two visual views, one shared prefix.</strong></figcaption>
+              </figure>
+              <figure class="paper-mini-card" data-paper-step="1">
+                <img src="paper_assets/figure-pipeline-b.jpg" alt="Paper pipeline figure reference B" />
+                <figcaption><span>Paper case reference</span><strong>Contrastive supervision flows back to the student.</strong></figcaption>
+              </figure>
+              <div class="paper-rail-note">
+                <span class="rail-pulse"></span>
+                <strong>Now showing the paper’s visual logic</strong>
+                <small>Use the controls above to move through the pipeline.</small>
+              </div>
+            </div>
             <div class="diagram-bottom">
               <div class="step-explainer" aria-live="polite">
                 <span class="step-count">STEP 1 / 3</span>
@@ -360,7 +410,7 @@
           <p class="diagram-mobile-hint">← Swipe to explore the full research schematic →</p>
 
           <div class="method-cards story-cards">
-            <article class="method-card story-card story-card-guess">
+            <article class="method-card story-card story-card-guess" data-story-step="0">
               <div class="method-card-top"><span class="method-tag">BEFORE · THE GUESS</span><span class="method-symbol">?</span></div>
               <div class="story-visual guess-visual">
                 <span class="story-sun"></span><span class="story-hill"></span><span class="story-person"></span>
@@ -369,7 +419,7 @@
               <h3>A right answer can be a lucky guess.</h3>
               <p>Hide the clue. If the model still answers the same way, it may not have looked at all.</p>
             </article>
-            <article class="method-card story-card story-card-compare">
+            <article class="method-card story-card story-card-compare" data-story-step="1">
               <div class="method-card-top"><span class="method-tag">DURING · THE CONTRAST</span><span class="method-symbol">↔</span></div>
               <div class="story-visual compare-visual">
                 <span class="compare-crop compare-good"><i></i><b>useful clue</b></span>
@@ -381,7 +431,7 @@
               <h3>Show what changes—and what doesn’t.</h3>
               <p>Two teachers see the same question and prefix, but different parts of the image.</p>
             </article>
-            <article class="method-card story-card story-card-learn">
+            <article class="method-card story-card story-card-learn" data-story-step="2">
               <div class="method-card-top"><span class="method-tag">AFTER · THE INSIGHT</span><span class="method-symbol">✦</span></div>
               <div class="story-visual learn-visual">
                 <span class="learn-word word-the">The</span><span class="learn-word word-red">red</span><span class="learn-word word-coat">coat</span>
@@ -446,8 +496,8 @@
                 this project repository.
               </p>
               <div class="resource-actions">
-                <a class="button button-light" href="CV_OPD_Contrastive_Vision_OPD_ICLR_27.pdf" target="_blank" rel="noreferrer">Open paper <span>↗</span></a>
-                <a class="button button-outline-light" href="README.md" target="_blank" rel="noreferrer">Read README <span>↗</span></a>
+                <a class="button button-light" href="paper_assets/paper.pdf" target="_blank" rel="noreferrer">Open paper <span>↗</span></a>
+                <a class="button button-outline-light" href="https://github.com/HaoLin3419/Contrastive-Vision-OPD" target="_blank" rel="noreferrer">Open GitHub <span>↗</span></a>
               </div>
             </div>
             <div class="resource-visual">
@@ -455,6 +505,10 @@
               <div class="resource-badge">
                 <span class="badge-top">CV-OPD</span>
                 <span class="badge-bottom">evidence × policy</span>
+              </div>
+              <div class="github-float">
+                <span class="github-mark">⌘</span>
+                <span><small>official implementation</small><strong>github.com/HaoLin3419</strong></span>
               </div>
             </div>
           </div>
