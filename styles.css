@@ -203,3 +203,78 @@ h1 em { color: var(--teal); font-style: normal; }
   .paper-evidence-image { height:112px; }
   .paper-figure-rail { grid-template-columns:1fr; }
 }
+
+.hero-paper-image {
+  height: auto;
+  aspect-ratio: 671 / 314;
+  object-fit: contain;
+  object-position: center;
+  background: #f4faf7;
+}
+
+.hero-paper-image-small {
+  aspect-ratio: 4 / 3;
+}
+
+.paper-reference-card img {
+  height: auto;
+  aspect-ratio: 1943 / 1271;
+  object-fit: contain;
+  object-position: center;
+  background: #eef5f2;
+}
+
+.paper-evidence-image {
+  height: auto;
+  aspect-ratio: 1943 / 1271;
+  object-fit: contain;
+  object-position: center;
+  background: #eef5f2;
+}
+
+.motivation-photo {
+  height: auto;
+  aspect-ratio: 1943 / 1271;
+  background: #e8efed;
+}
+
+.motivation-photo-image {
+  object-fit: contain;
+  object-position: center;
+  background: #e8efed;
+}
+
+.storyboard-image {
+  height: auto;
+  aspect-ratio: 2632 / 1054;
+  background: #edf3f1;
+}
+
+.storyboard-paper-image {
+  object-fit: contain;
+  object-position: center;
+  background: #edf3f1;
+}
+
+.paper-mini-card img {
+  height: 112px;
+  object-fit: contain;
+  object-position: center;
+  background: #eef5f2;
+}
+
+@media (max-width: 720px) {
+  .hero-paper-image,
+  .hero-paper-image-small,
+  .paper-evidence-image {
+    height: auto;
+  }
+
+  .motivation-photo {
+    height: auto;
+  }
+
+  .paper-mini-card img {
+    height: 112px;
+  }
+}
