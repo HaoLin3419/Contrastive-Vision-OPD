@@ -18,12 +18,10 @@ if (menuToggle && header) {
 const pipelineDemo = document.querySelector(".pipeline-demo");
 
 if (pipelineDemo) {
-  const diagram = pipelineDemo.querySelector(".pipeline-diagram");
   const playButton = pipelineDemo.querySelector(".diagram-play");
   const restartButton = pipelineDemo.querySelector(".diagram-restart");
   const stepButtons = [...pipelineDemo.querySelectorAll("[data-go-step]")];
   const storyCards = [...document.querySelectorAll(".story-card[data-story-step]")];
-  const paperCards = [...pipelineDemo.querySelectorAll(".paper-mini-card[data-paper-step]")];
   const stepCount = pipelineDemo.querySelector(".step-count");
   const stepTitle = pipelineDemo.querySelector(".step-title");
   const stepDescription = pipelineDemo.querySelector(".step-description");
@@ -31,17 +29,17 @@ if (pipelineDemo) {
     {
       title: "Sample on-policy trajectories",
       description:
-        "The student samples on-policy responses from the full image. The resulting prefix is held fixed for both teacher views.",
+        "The student samples multiple on-policy responses from the full image. A training sample is retained when at least one rollout is correct.",
     },
     {
       title: "Contrast positive and negative evidence",
       description:
-        "The positive teacher sees the answer-related region while the negative teacher sees an unrelated crop. CDL contrasts their distributions and DAG selects useful tokens.",
+        "The teacher branches share parameters and the same student prefix. They differ only in the privileged crop: answer-related R+ versus unrelated R−.",
     },
     {
       title: "Update the grounded policy",
       description:
-        "The gated JSD and contrastive signal updates the student. EMA keeps the teacher synchronized for the next on-policy iteration.",
+        "Positive-teacher JSD and the discrepancy-gated contrastive divergence loss update the student, while EMA refreshes the teacher parameters.",
     },
   ];
   let activeStep = 0;
@@ -65,10 +63,6 @@ if (pipelineDemo) {
       card.classList.toggle("is-active", Number(card.dataset.storyStep) === activeStep);
     });
 
-    paperCards.forEach((card) => {
-      const isActive = Number(card.dataset.paperStep) === activeStep;
-      card.classList.toggle("is-active", isActive);
-    });
   };
 
   const startPlayback = () => {
@@ -83,11 +77,6 @@ if (pipelineDemo) {
     playButton.setAttribute("aria-label", paused ? "Play animation" : "Pause animation");
     playButton.title = paused ? "Play animation" : "Pause animation";
 
-    if (diagram && typeof diagram.pauseAnimations === "function") {
-      if (paused) diagram.pauseAnimations();
-      else diagram.unpauseAnimations();
-    }
-
     if (paused) window.clearInterval(intervalId);
     else startPlayback();
   };
@@ -100,7 +89,6 @@ if (pipelineDemo) {
   restartButton.addEventListener("click", () => {
     setStep(0);
     setPaused(false);
-    if (diagram && typeof diagram.setCurrentTime === "function") diagram.setCurrentTime(0);
   });
 
   setStep(0);
