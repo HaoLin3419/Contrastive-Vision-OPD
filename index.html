@@ -48,9 +48,6 @@
             </p>
             <div class="hero-actions">
               <a class="button button-primary" href="#method">Explore the method <span>↗</span></a>
-              <a class="button button-secondary" href="CV_OPD_Contrastive_Vision_OPD_ICLR_27.pdf" target="_blank" rel="noreferrer">
-                Read the paper <span>↗</span>
-              </a>
             </div>
             <div class="hero-meta">
               <span>Contrastive Vision On-Policy Distillation</span>
@@ -61,35 +58,23 @@
             </div>
           </div>
 
-          <div class="hero-visual" aria-label="Conceptual visual evidence illustration">
+          <div class="hero-visual" aria-label="CV-OPD paper evidence examples">
             <div class="orbit orbit-one"></div>
             <div class="orbit orbit-two"></div>
             <div class="visual-card visual-card-main">
-              <div class="card-kicker">visual evidence</div>
-              <div class="scene">
-                <div class="scene-sun"></div>
-                <div class="scene-hill hill-back"></div>
-                <div class="scene-hill hill-front"></div>
-                <div class="scene-tree tree-left"><span></span><i></i></div>
-                <div class="scene-tree tree-right"><span></span><i></i></div>
-                <div class="scene-person"><span></span><i></i><b></b></div>
-                <div class="evidence-box"><span>relevant region</span></div>
-              </div>
+              <div class="card-kicker">paper overview · Figure 1</div>
+              <img class="hero-paper-image" src="paper_assets/cvopd-figure-1-overview.png" alt="CV-OPD paper overview comparing masked evidence and grounded responses" />
               <div class="visual-caption">
-                <span>Positive crop</span>
-                <strong>grounded signal</strong>
+                <span>Answer-related evidence</span>
+                <strong>grounded response</strong>
               </div>
             </div>
             <div class="visual-card visual-card-negative">
-              <div class="card-kicker">negative teacher</div>
-              <div class="noise-grid">
-                <span></span><span></span><span></span><span></span><span></span><span></span>
-                <span></span><span></span><span></span><span></span><span></span><span></span>
-                <span></span><span></span><span></span><span></span><span></span><span></span>
-              </div>
+              <div class="card-kicker">paper case · Figure 6</div>
+              <img class="hero-paper-image hero-paper-image-small" src="paper_assets/cvopd-figure-6-evidence.jpg" alt="CV-OPD response when answer-related visual evidence is insufficient" />
               <div class="visual-caption">
-                <span>Random crop</span>
-                <strong>irrelevant cue</strong>
+                <span>Insufficient evidence</span>
+                <strong>acknowledge uncertainty</strong>
               </div>
             </div>
             <div class="floating-chip chip-cdl"><span>01</span> CDL</div>
@@ -113,7 +98,7 @@
           <div class="problem-panel">
             <div class="panel-label">Diagnostic observation</div>
             <figure class="paper-reference-card">
-              <img src="paper_assets/figure-diagnostic.jpg" alt="Paper diagnostic showing model behavior under damaged visual evidence" />
+              <img src="paper_assets/cvopd-figure-2-mask.jpg" alt="CV-OPD paper diagnostic showing masked visual evidence" />
               <figcaption>
                 <span>Paper Figure 2</span>
                 <strong>When the answer survives, the visual shortcut is exposed.</strong>
@@ -121,17 +106,13 @@
             </figure>
             <div class="evidence-comparison">
               <div class="evidence-state">
-                <div class="mini-image mini-image-normal">
-                  <div class="mini-sun"></div><div class="mini-hill"></div><div class="mini-object"></div>
-                </div>
+                  <img class="paper-evidence-image" src="paper_assets/cvopd-figure-2-mask.jpg" alt="Masked evidence diagnostic from the CV-OPD paper" />
                 <span>Full evidence</span>
                 <strong class="good-text">Correct answer</strong>
               </div>
               <div class="comparison-symbol">→</div>
               <div class="evidence-state">
-                <div class="mini-image mini-image-masked">
-                  <div class="mask-block"></div><div class="mini-hill"></div><div class="mini-object faded"></div>
-                </div>
+                  <img class="paper-evidence-image" src="paper_assets/cvopd-figure-2-noise.jpg" alt="Noise-corrupted evidence diagnostic from the CV-OPD paper" />
                 <span>Relevant region masked</span>
                 <strong class="bad-text">Still correct</strong>
               </div>
@@ -146,11 +127,8 @@
               </div>
               <div class="motivation-stage">
                 <div class="motivation-photo">
-                  <span class="motivation-sun"></span>
-                  <span class="motivation-hill"></span>
-                  <span class="motivation-lock"></span>
-                  <span class="motivation-mask"></span>
-                  <span class="motivation-noise"></span>
+                  <img class="motivation-photo-image motivation-photo-mask" src="paper_assets/cvopd-figure-2-mask.jpg" alt="CV-OPD black-mask diagnostic" />
+                  <img class="motivation-photo-image motivation-photo-noise" src="paper_assets/cvopd-figure-2-noise.jpg" alt="CV-OPD Gaussian-noise diagnostic" />
                 </div>
                 <div class="motivation-copy">
                   <span class="motivation-question">What color is the lock?</span>
@@ -184,8 +162,8 @@
           <div class="pipeline-demo" data-step="0">
             <div class="pipeline-demo-top">
               <div>
-                <div class="diagram-eyebrow"><span class="diagram-live-dot"></span> Watch the visual evidence move through the model</div>
-                <h3>One image. Two views. A more grounded policy.</h3>
+              <div class="diagram-eyebrow"><span class="diagram-live-dot"></span> Paper Figure 3 · interactive reconstruction</div>
+                <h3>Roll out once. Compare two views. Update what looks.</h3>
               </div>
               <div class="diagram-controls" aria-label="Pipeline animation controls">
                 <button class="diagram-control diagram-play" type="button" aria-label="Pause animation" title="Pause animation">Ⅱ</button>
@@ -238,18 +216,9 @@
                   <text x="34" y="67" class="svg-caption">The student samples its own trajectories from the original image.</text>
                   <rect class="svg-card input-card" x="34" y="91" width="224" height="242" rx="18" filter="url(#cardShadow)" />
                   <text x="53" y="119" class="svg-card-kicker">FULL IMAGE + QUESTION</text>
-                  <rect x="52" y="133" width="188" height="118" rx="11" fill="url(#imgSky)" />
-                  <circle cx="203" cy="158" r="15" fill="#ffc367" />
-                  <path d="M52 216Q103 183 148 211T240 205V251H52Z" fill="#74b09a" />
-                  <path d="M52 226Q105 205 157 225T240 218V251H52Z" fill="#328b77" />
-                  <path d="M84 215v-34m0 9-14-17m14 23 14-20" stroke="#76513c" stroke-width="5" stroke-linecap="round" />
-                  <circle cx="84" cy="171" r="13" fill="#377e65" />
-                  <circle cx="97" cy="179" r="11" fill="#59a47d" />
-                  <circle cx="178" cy="206" r="7" fill="#55423b" />
-                  <path d="M172 214h13l7 24h-25z" fill="#f07661" />
-                  <path d="M174 235v12m8-12v12" stroke="#273d55" stroke-width="4" stroke-linecap="round" />
-                  <rect x="164" y="193" width="34" height="51" rx="4" class="positive-crop-box" />
-                  <rect x="71" y="146" width="44" height="48" rx="4" class="negative-crop-box" />
+                  <image href="paper_assets/cvopd-figure-2-mask.jpg" x="52" y="133" width="188" height="118" preserveAspectRatio="xMidYMid slice" />
+                  <rect x="162" y="185" width="54" height="55" rx="5" class="positive-crop-box" />
+                  <rect x="73" y="143" width="55" height="50" rx="5" class="negative-crop-box" />
                   <text x="52" y="272" class="svg-small">Q: What is the person wearing?</text>
                   <rect x="52" y="286" width="188" height="28" rx="8" fill="#f0f4f3" />
                   <text x="65" y="305" class="svg-answer">Student prefix: “The person is…”</text>
@@ -285,14 +254,12 @@
                   <circle class="flow-particle particle-neutral" r="5"><animateMotion dur="2.5s" repeatCount="indefinite" path="M927 210H950V137H974" /></circle>
 
                   <rect class="crop-card crop-positive-card" x="976" y="101" width="188" height="87" rx="15" />
-                  <rect x="991" y="117" width="51" height="51" rx="9" fill="url(#imgSky)" />
-                  <path d="M991 153q25-15 51-3v19h-51z" fill="#328b77" />
-                  <path d="M1015 143h12l6 22h-24z" fill="#f07661" />
+                  <image href="paper_assets/cvopd-figure-2-mask.jpg" x="991" y="117" width="51" height="51" preserveAspectRatio="xMidYMid slice" />
                   <text x="1053" y="131" class="svg-card-kicker">POSITIVE CROP</text>
                   <text x="1053" y="153" class="svg-body">Answer-related</text>
                   <text x="1053" y="171" class="svg-small">high evidence</text>
                   <rect class="crop-card crop-negative-card" x="976" y="239" width="188" height="87" rx="15" />
-                  <rect x="991" y="255" width="51" height="51" rx="9" fill="url(#noisePattern)" />
+                   <image href="paper_assets/cvopd-figure-2-noise.jpg" x="991" y="255" width="51" height="51" preserveAspectRatio="xMidYMid slice" />
                   <text x="1053" y="269" class="svg-card-kicker">NEGATIVE CROP</text>
                   <text x="1053" y="291" class="svg-body">Random region</text>
                   <text x="1053" y="309" class="svg-small">low overlap · irrelevant</text>
@@ -377,19 +344,23 @@
               </svg>
             </div>
             <div class="paper-figure-rail" aria-label="Paper figure references">
-              <figure class="paper-mini-card is-active" data-paper-step="0">
-                <img src="paper_assets/figure-pipeline-a.jpg" alt="Paper pipeline figure reference A" />
-                <figcaption><span>Paper case reference</span><strong>Two visual views, one shared prefix.</strong></figcaption>
-              </figure>
-              <figure class="paper-mini-card" data-paper-step="1">
-                <img src="paper_assets/figure-pipeline-b.jpg" alt="Paper pipeline figure reference B" />
-                <figcaption><span>Paper case reference</span><strong>Contrastive supervision flows back to the student.</strong></figcaption>
-              </figure>
-              <div class="paper-rail-note">
-                <span class="rail-pulse"></span>
-                <strong>Now showing the paper’s visual logic</strong>
-                <small>Use the controls above to move through the pipeline.</small>
-              </div>
+                <figure class="paper-mini-card is-active" data-paper-step="0">
+                  <img src="paper_assets/cvopd-figure-1-overview.png" alt="CV-OPD overview from the paper" />
+                  <figcaption><span>Paper Figure 1</span><strong>Broken evidence reveals the shortcut.</strong></figcaption>
+                </figure>
+                <figure class="paper-mini-card" data-paper-step="1">
+                  <img src="paper_assets/cvopd-figure-4-attention.jpg" alt="CV-OPD attention comparison from the paper" />
+                  <figcaption><span>Paper Figure 4</span><strong>Attention moves toward the answer-relevant region.</strong></figcaption>
+                </figure>
+                <figure class="paper-mini-card" data-paper-step="2">
+                  <img src="paper_assets/cvopd-figure-6-evidence.jpg" alt="CV-OPD insufficient evidence case from the paper" />
+                  <figcaption><span>Paper Figure 6</span><strong>When evidence is missing, the response says so.</strong></figcaption>
+                </figure>
+                <div class="paper-rail-note">
+                  <span class="rail-pulse"></span>
+                  <strong>Now showing the paper’s visual logic</strong>
+                  <small>The animation follows the positive teacher, negative teacher, DAG, CDL, and EMA update.</small>
+                </div>
             </div>
             <div class="diagram-bottom">
               <div class="step-explainer" aria-live="polite">
@@ -463,10 +434,10 @@
               <span class="storyboard-live"><i></i> live example</span>
             </div>
             <div class="storyboard-scene">
-              <div class="storyboard-image"><span class="sb-sun"></span><span class="sb-hill"></span><span class="sb-person"></span><span class="sb-crop"></span></div>
-              <div class="storyboard-question">What color is the person wearing?</div>
-              <div class="storyboard-answer answer-one"><small>full evidence</small><strong>“red”</strong></div>
-              <div class="storyboard-answer answer-two"><small>evidence removed</small><strong>“I’m not sure”</strong></div>
+              <div class="storyboard-image"><img class="storyboard-paper-image" src="paper_assets/cvopd-figure-4-attention.jpg" alt="CV-OPD and Vision-OPD attention comparison for the lock question" /></div>
+              <div class="storyboard-question">What is the color of the lock?</div>
+              <div class="storyboard-answer answer-one"><small>full evidence · CV-OPD</small><strong>“silver”</strong></div>
+              <div class="storyboard-answer answer-two"><small>black mask · evidence missing</small><strong>“not visible”</strong></div>
               <div class="storyboard-arrow">→</div>
             </div>
             <div class="storyboard-footer"><span>Evidence-sensitive behavior</span><strong>not answer memorization</strong></div>
@@ -492,11 +463,9 @@
               <div class="section-number">05 / Resources</div>
               <h2>Build models that answer from evidence.</h2>
               <p>
-                Explore the paper and the accompanying training and evaluation code included in
-                this project repository.
+                Explore the implementation and the evidence-grounded training idea behind CV-OPD.
               </p>
               <div class="resource-actions">
-                <a class="button button-light" href="paper_assets/paper.pdf" target="_blank" rel="noreferrer">Open paper <span>↗</span></a>
                 <a class="button button-outline-light" href="https://github.com/HaoLin3419/Contrastive-Vision-OPD" target="_blank" rel="noreferrer">Open GitHub <span>↗</span></a>
               </div>
             </div>

@@ -31,17 +31,17 @@ if (pipelineDemo) {
     {
       title: "Sample on-policy trajectories",
       description:
-        "The student sees the full image and generates answer prefixes. Both teacher branches reuse those exact prefixes.",
+        "The student samples on-policy responses from the full image. The resulting prefix is held fixed for both teacher views.",
     },
     {
       title: "Contrast positive and negative evidence",
       description:
-        "CDL pulls the student toward the answer-related crop and away from an unrelated crop; DAG gates unreliable samples and uninformative tokens.",
+        "The positive teacher sees the answer-related region while the negative teacher sees an unrelated crop. CDL contrasts their distributions and DAG selects useful tokens.",
     },
     {
       title: "Update the grounded policy",
       description:
-        "The combined JSD and gated contrastive objective updates the student, while the EMA teacher tracks the new policy for the next iteration.",
+        "The gated JSD and contrastive signal updates the student. EMA keeps the teacher synchronized for the next on-policy iteration.",
     },
   ];
   let activeStep = 0;
@@ -66,7 +66,7 @@ if (pipelineDemo) {
     });
 
     paperCards.forEach((card) => {
-      const isActive = Number(card.dataset.paperStep) === (activeStep === 2 ? 1 : activeStep);
+      const isActive = Number(card.dataset.paperStep) === activeStep;
       card.classList.toggle("is-active", isActive);
     });
   };
