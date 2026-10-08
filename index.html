@@ -3,242 +3,444 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="CV-OPD: Contrastive Vision On-Policy Distillation. Learning to distinguish answer-relevant visual evidence from irrelevant cues." />
-    <title>CV-OPD | Contrastive Vision On-Policy Distillation</title>
-    <link rel="stylesheet" href="styles.css" />
-    <script src="paper_assets/lucide.min.js" defer></script>
-    <script src="script.js" defer></script>
+    <meta name="description" content="CV-OPD: Contrastive Vision On-Policy Distillation. A research project on crop-conditioned contrastive supervision for visually grounded multimodal reasoning." />
+    <title>CV-OPD: Contrastive Vision On-Policy Distillation</title>
+    <link rel="canonical" href="https://haolin3419.github.io/Contrastive-Vision-OPD/" />
+    <link rel="stylesheet" href="./styles.css" />
+    <script src="./paper_assets/lucide.min.js" defer></script>
+    <script src="./script.js" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
     <header class="site-header">
       <div class="header-inner">
-        <a class="brand" href="#top"><span class="brand-symbol" aria-hidden="true">CV</span>CV-OPD</a>
-        <nav class="nav-links" aria-label="Main navigation">
-          <a href="#motivation">Motivation</a>
+        <a class="brand" href="#top">CV-OPD</a>
+        <nav class="nav-links" id="navigation" aria-label="Main navigation">
+          <a href="#overview">Overview</a>
+          <a href="#comparison">Contrast</a>
           <a href="#method">Method</a>
           <a href="#results">Results</a>
-          <a href="#evidence">Visual evidence</a>
+          <a href="#ablations">Ablations</a>
+          <a href="#citation">Citation</a>
         </nav>
-        <a class="header-paper" href="CV_OPD_Contrastive_Vision_OPD_ICLR_27.pdf" target="_blank" rel="noopener"><i data-lucide="file-text"></i><span>Paper</span><i data-lucide="arrow-up-right"></i></a>
-        <button class="icon-button menu-toggle" type="button" aria-expanded="false" aria-label="Open navigation" title="Open navigation"><i data-lucide="menu"></i></button>
+        <a class="header-code" href="https://github.com/HaoLin3419/Contrastive-Vision-OPD" target="_blank" rel="noopener"><i data-lucide="github"></i>Code<i data-lucide="arrow-up-right"></i></a>
+        <button class="icon-button menu-toggle" type="button" aria-controls="navigation" aria-expanded="false" aria-label="Open navigation" title="Open navigation"><i data-lucide="menu"></i></button>
       </div>
     </header>
 
     <main id="main">
       <section class="masthead container" id="top" aria-labelledby="paper-title">
-        <p class="eyebrow"><span class="status-dot"></span>Research paper <span class="eyebrow-divider">/</span> Under review at ICLR 2027</p>
-        <h1 id="paper-title">CV-OPD<span>Contrastive Vision<br class="desktop-break" /> On-Policy Distillation</span></h1>
-        <p class="abstract-line">A correct answer is not always a grounded answer.<br />Teach the student what visual evidence to rely on, not just what to say.</p>
+        <p class="paper-status">ICLR 2027 submission · Under review</p>
+        <h1 id="paper-title"><span>CV-OPD:</span> Contrastive Vision<br class="title-break" /> On-Policy Distillation</h1>
+        <p class="authors">Anonymous authors <span>·</span> Double-blind submission</p>
+        <p class="abstract-line">Contrastive visual supervision for learning to distinguish<br class="title-break" /> answer-relevant evidence from irrelevant cues.</p>
         <div class="paper-actions">
-          <a class="button button-primary" href="CV_OPD_Contrastive_Vision_OPD_ICLR_27.pdf" target="_blank" rel="noopener"><i data-lucide="file-text"></i>Read the paper<i data-lucide="arrow-up-right"></i></a>
-          <a class="button" href="https://github.com/HaoLin3419/Contrastive-Vision-OPD" target="_blank" rel="noopener"><i data-lucide="github"></i>Code<i data-lucide="arrow-up-right"></i></a>
+          <a class="button button-primary" href="./CV_OPD_Contrastive_Vision_OPD_ICLR_27.pdf" target="_blank" rel="noopener"><i data-lucide="file-text"></i>Paper</a>
+          <a class="button" href="https://github.com/HaoLin3419/Contrastive-Vision-OPD" target="_blank" rel="noopener"><i data-lucide="github"></i>Code</a>
+          <a class="button" href="https://haolin3419.github.io/Contrastive-Vision-OPD/"><i data-lucide="globe"></i>Project Page</a>
         </div>
       </section>
 
-      <section class="overview container" aria-labelledby="overview-title">
-        <div class="figure-heading"><h2 id="overview-title">When the evidence disappears, the answer should reflect it.</h2><span>Figure 1</span></div>
-        <button class="figure-button" type="button" data-figure="paper_assets/figure-1-hires.png" data-caption="Figure 1 · Evidence availability and model behavior" aria-label="Enlarge Figure 1">
-          <img src="paper_assets/figure-1-hires.png" width="1640" height="652" alt="Paper Figure 1: with the girl's shirt hidden, Vision-OPD still predicts pink, while CV-OPD acknowledges that the color is not clearly visible. The right panel compares benchmark accuracy and masked-input error." fetchpriority="high" />
-          <span class="expand-icon" aria-hidden="true"><i data-lucide="maximize-2"></i></span>
-        </button>
-        <div class="overview-takeaways">
-          <p><span class="number">01</span><span><strong>The shortcut</strong>Correct predictions can persist without the answer-relevant pixels.</span></p>
-          <p><span class="number">02</span><span><strong>The intervention</strong>Contrast relevant and irrelevant crops under the same student prefix.</span></p>
-          <p><span class="number">03</span><span><strong>The outcome</strong>More evidence-sensitive responses and higher benchmark accuracy.</span></p>
+      <section class="section container overview-section" id="overview" aria-labelledby="overview-title">
+        <div class="section-heading"><h2 id="overview-title"><span class="section-number">01</span>Overview</h2><span class="section-source">Abstract & §2</span></div>
+        <div class="prose">
+          <p>Vision-language models trained with on-policy distillation can produce the expected answer even when answer-relevant regions are masked or replaced with noise. This observation suggests that matching a privileged teacher's outputs does not necessarily teach the student to rely on visual evidence.</p>
+          <p><strong>CV-OPD compares positive and negative crop-conditioned teacher distributions under the same student prefix.</strong> A Contrastive Divergence Loss (CDL) introduces a margin between the student's distances to the two teachers. A Discrepancy Aware Gate (DAG) selects token positions for contrastive supervision and excludes samples with no correct rollout.</p>
         </div>
       </section>
 
-      <section class="section band" id="motivation">
-        <div class="container">
-          <div class="section-heading">
-            <div><p class="eyebrow">01 / Motivation</p><h2>Answer matching leaves<br />a visual shortcut open.</h2></div>
-            <p>Vision-OPD gives a crop-conditioned teacher privileged visual evidence. Matching its output distribution does not, by itself, require the full-image student to find that evidence.</p>
-          </div>
-          <div class="diagnostic-layout">
-            <figure>
-              <button class="figure-button" type="button" data-figure="paper_assets/figure-2-hires.png" data-caption="Figure 2 · Black-mask and Gaussian-noise diagnostics" aria-label="Enlarge Figure 2">
-                <img src="paper_assets/figure-2-hires.png" width="1592" height="752" alt="Figure 2: accuracy under black-mask and Gaussian-noise corruption, and Vision-OPD attention examples for a lock's color and a woman's pose." loading="lazy" />
-                <span class="expand-icon" aria-hidden="true"><i data-lucide="maximize-2"></i></span>
-              </button>
-              <figcaption>Figure 2 · Corrupted-input evaluation and attention analysis, paper §2.2.</figcaption>
-            </figure>
-            <div class="diagnostic-copy">
-              <div><span class="small-label">Intervention</span><h3>Remove the relevant evidence.</h3><p>Replace the answer-related region with a black mask or Gaussian noise.</p></div>
-              <div><span class="small-label">Observation</span><h3>The expected answer can remain.</h3><p>The model may still predict the original answer even though its visual basis is missing.</p></div>
-              <div class="key-insight"><span class="small-label">Implication</span><p><strong>Accuracy alone cannot establish visual grounding.</strong> We also need to test whether predictions depend on the available evidence.</p></div>
+      <section class="section container mechanism-section" id="comparison" aria-labelledby="comparison-title">
+        <div class="section-heading"><h2 id="comparison-title">Vision-OPD vs. CV-OPD</h2><span class="section-source">§2.1–3.4 · Eq. 3, 8–14</span></div>
+        <p class="section-lede">From alignment to contrastive supervision: the visual conditions change the teacher distributions, not the student-generated prefix.</p>
+        <div class="mechanism-grid">
+          <article class="mechanism-column">
+            <h3>Vision-OPD</h3>
+            <p class="mechanism-subtitle">Crop-conditioned distribution alignment</p>
+            <div class="mechanism-path"><img src="./paper_assets/method-full.png" alt="Full-image student input from Figure 3" loading="lazy" width="166" height="122" /><div><span>Original image + question</span><p><i data-lucide="arrow-right" aria-hidden="true"></i>Student rollout <strong>π</strong></p></div></div>
+            <div class="mechanism-path positive-path"><img src="./paper_assets/method-positive.png" alt="Relevant crop from Figure 3, reused to illustrate positive teacher input" loading="lazy" width="104" height="106" /><div><span>Relevant crop + student prefix</span><p><i data-lucide="arrow-right" aria-hidden="true"></i>Positive teacher <strong>τ<sup>+</sup></strong></p></div></div>
+            <div class="mechanism-absence"><span>No negative visual condition</span><p>The objective aligns π with τ<sup>+</sup>.</p></div>
+            <div class="mechanism-objective"><i data-lucide="arrow-down" aria-hidden="true"></i><p><strong>Positive-teacher JSD</strong><span>π, τ<sup>+</sup> → distribution alignment → student update</span></p></div>
+            <p class="mechanism-explanation">The relevant crop supplies focused visual supervision. Matching its teacher distribution, however, does not by itself guarantee that the student uses the same visual evidence (§2.2–2.3).</p>
+          </article>
+          <article class="mechanism-column">
+            <h3>CV-OPD</h3>
+            <p class="mechanism-subtitle">Alignment + gated contrastive supervision</p>
+            <div class="mechanism-path"><img src="./paper_assets/method-full.png" alt="Full-image student input from Figure 3" loading="lazy" width="166" height="122" /><div><span>Original image + question</span><p><i data-lucide="arrow-right" aria-hidden="true"></i>Student rollout <strong>π</strong></p></div></div>
+            <div class="mechanism-path positive-path"><img src="./paper_assets/method-positive.png" alt="Positive teacher's relevant crop from Figure 3" loading="lazy" width="104" height="106" /><div><span>Relevant crop + student prefix</span><p><i data-lucide="arrow-right" aria-hidden="true"></i>Positive teacher <strong>τ<sup>+</sup></strong></p></div></div>
+            <div class="mechanism-path negative-path"><img src="./paper_assets/method-negative.png" alt="Negative teacher's unrelated ground crop from Figure 3" loading="lazy" width="50" height="34" /><div><span>Irrelevant crop + same prefix</span><p><i data-lucide="arrow-right" aria-hidden="true"></i>Negative teacher <strong>τ<sup>−</sup></strong></p></div></div>
+            <div class="mechanism-objective"><i data-lucide="arrow-down" aria-hidden="true"></i><p><strong>Positive-teacher JSD + gated CDL</strong><span>π, τ<sup>+</sup>, τ<sup>−</sup> → CDL + DAG → student update</span></p></div>
+            <p class="mechanism-explanation">Positive alignment is complemented by margin-based negative separation. DAG retains eligible samples and selects token positions for CDL. The two teacher branches share parameters.</p>
+          </article>
+        </div>
+        <p class="method-invariant"><strong>Key difference.</strong> Vision-OPD transfers crop-conditioned knowledge through distribution alignment. CV-OPD additionally contrasts different visual conditions to encourage discrimination between relevant evidence and irrelevant cues. This is not a guarantee of grounding. Input thumbnails are reused from Figure 3.</p>
+      </section>
+
+      <section class="section container" id="method" aria-labelledby="method-title">
+        <div class="section-heading"><h2 id="method-title"><span class="section-number">02</span>Method</h2><span class="section-source">§3 · Figure 3</span></div>
+        <p class="section-lede">The student receives the full image. Two parameter-sharing teacher branches receive different crops and evaluate the same student-generated prefix.</p>
+
+        <figure class="pipeline-figure">
+          <button class="figure-button" type="button" data-figure="./paper_assets/figure-3-hires.png" data-caption="Figure 3 · CV-OPD training pipeline · Paper p. 5" aria-label="Enlarge Figure 3: CV-OPD training pipeline">
+            <img src="./paper_assets/figure-3-hires.png" width="1592" height="828" alt="CV-OPD pipeline from Figure 3. A full-image student samples trajectories; shared positive and negative teachers evaluate its prefix using relevant and unrelated crops. JSD, discrepancy-aware gating and contrastive divergence supervise the student, followed by an EMA teacher update." fetchpriority="high" />
+            <span class="expand-icon" aria-hidden="true"><i data-lucide="maximize-2"></i></span>
+          </button>
+          <figcaption><strong>Figure 3. CV-OPD pipeline.</strong> Student rollouts are scored under positive and negative visual inputs. JSD provides positive-teacher alignment; DAG selects positions for the additional contrastive objective. Teacher parameters track the student through EMA.</figcaption>
+        </figure>
+
+        <div class="subsection-heading"><h3>Student and teacher inputs</h3><span class="section-source">§3.1 · Eq. 6–8</span></div>
+        <div class="input-comparison">
+          <article class="input-branch student-branch">
+            <div class="input-image"><img src="./paper_assets/method-full.png" width="166" height="122" alt="The full image used by the student in Figure 3." loading="lazy" /></div>
+            <h4>Student <span class="notation">π<sub>θ</sub></span></h4>
+            <p class="input-label">Full image + question</p>
+            <p>Generates on-policy rollouts and learns from teacher distributions along its own prefixes.</p>
+          </article>
+          <article class="input-branch positive-branch">
+            <div class="input-image"><img src="./paper_assets/method-positive.png" width="104" height="106" alt="The answer-relevant positive crop: the girl's pink shirt in Figure 3." loading="lazy" /></div>
+            <h4>Positive Teacher <span class="notation">τ<sup>+</sup></span></h4>
+            <p class="input-label">Answer-relevant crop R<sup>+</sup></p>
+            <p>Provides supervision conditioned on the region containing the evidence needed to answer.</p>
+          </article>
+          <article class="input-branch negative-branch">
+            <div class="input-image"><img src="./paper_assets/method-negative.png" width="50" height="34" alt="The answer-irrelevant negative crop: the ground in Figure 3." loading="lazy" /></div>
+            <h4>Negative Teacher <span class="notation">τ<sup>−</sup></span></h4>
+            <p class="input-label">Answer-irrelevant crop R<sup>−</sup></p>
+            <p>Provides a contrasting distribution conditioned on an unrelated region of the same image.</p>
+          </article>
+        </div>
+        <p class="method-invariant"><strong>Shared parameters. Shared prefix. Different crops.</strong> R<sup>−</sup> matches R<sup>+</sup> in size and satisfies IoU(R<sup>+</sup>, R<sup>−</sup>) ≤ δ. One negative crop is shared across all rollouts of each sample.</p>
+
+        <div class="subsection-heading"><h3>Contrastive supervision and gating</h3><span class="section-source">§3.2–3.4</span></div>
+        <div class="loss-components">
+          <article>
+            <div class="component-heading"><span class="component-code">CDL</span><h4>Contrastive Divergence Loss</h4></div>
+            <p>Pull the student toward the positive teacher and push it away from the negative teacher, until a margin is satisfied.</p>
+            <div class="equation"><span>ℓ<sub>CDL</sub> = max(0, μ + d<sup>+</sup> − d<sup>−</sup>)</span><span class="equation-ref">Eq. 9</span></div>
+            <p class="formula-note">d<sup>±</sup> = D<sub>JS</sub>(π, τ<sup>±</sup>). The loss is zero when d<sup>−</sup> − d<sup>+</sup> ≥ μ; the negative distribution is not pushed away indefinitely.</p>
+          </article>
+          <article>
+            <div class="component-heading"><span class="component-code">DAG</span><h4>Discrepancy Aware Gate</h4></div>
+            <p>Select token positions whose student–positive-teacher discrepancy exceeds the retained batch's mean.</p>
+            <div class="equation"><span>g<sub>i,t</sub> = 𝟙[d<sub>i,t</sub> &gt; d̄<sub>B</sub>]</span><span class="equation-ref">Eq. 12</span></div>
+            <p class="formula-note">d<sub>i,t</sub> = D<sub>JS</sub>(π<sub>i,t</sub>, τ<sup>+</sup><sub>i,t</sub>). At the sample level, exclude an example if none of its rollouts is correct (Eq. 13).</p>
+          </article>
+        </div>
+        <div class="training-objective">
+          <h4>Combined objective</h4>
+          <p>Positive-teacher JSD + λ × gated CDL. Retained examples receive distillation; the token gate applies to the contrastive term. Student updates are followed by an EMA update of the shared teacher.</p>
+          <span class="section-source">Eq. 14 · Algorithm 1</span>
+        </div>
+        <p class="inference-note"><strong>At inference:</strong> the student receives only the full image and question, without privileged crops or teacher branches.</p>
+
+        <div class="subsection-heading" id="inside-cvopd"><h3>Inside CV-OPD: Understanding CDL &amp; DAG</h3><span class="section-source">Eq. 9, 12–14 · Algorithm 1</span></div>
+        <p class="section-lede">The margin controls contrastive penalties. The token gate controls where CDL applies. The sample gate controls whether either supervision term applies at all.</p>
+
+        <article class="technical-demo" id="cdl-demo" aria-labelledby="cdl-demo-title">
+          <div class="demo-heading"><h4 id="cdl-demo-title">CDL · Margin constraint</h4><span class="section-source">One token position · Eq. 9</span></div>
+          <div class="demo-grid">
+            <div>
+              <div class="equation"><span>ℓ<sub>CDL</sub> = max(0, μ + d<sup>+</sup> − d<sup>−</sup>)</span></div>
+              <p class="demo-copy">d<sup>±</sup> = D<sub>JS</sub>(π, τ<sup>±</sup>) compares the full-vocabulary student and teacher distributions under the same prefix. The margin μ sets the required separation between these two discrepancies.</p>
+              <fieldset class="demo-controls" disabled>
+                <legend class="visually-hidden">Illustrative CDL discrepancies and margin</legend>
+                <label for="cdl-positive"><span>Positive discrepancy d<sup>+</sup></span><output id="cdl-positive-value" for="cdl-positive">0.30</output></label>
+                <input id="cdl-positive" type="range" min="0" max="0.69" step="0.01" value="0.30" aria-describedby="cdl-disclaimer" />
+                <label for="cdl-negative"><span>Negative discrepancy d<sup>−</sup></span><output id="cdl-negative-value" for="cdl-negative">0.20</output></label>
+                <input id="cdl-negative" type="range" min="0" max="0.69" step="0.01" value="0.20" aria-describedby="cdl-disclaimer" />
+                <label for="cdl-margin"><span>Margin μ</span><output id="cdl-margin-value" for="cdl-margin">0.10</output></label>
+                <input id="cdl-margin" type="range" min="0.01" max="0.69" step="0.01" value="0.10" aria-describedby="cdl-disclaimer" />
+              </fieldset>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section" id="method">
-        <div class="container">
-          <div class="section-heading">
-            <div><p class="eyebrow">02 / Method</p><h2>Same prefix.<br />Different visual evidence.</h2></div>
-            <p>CV-OPD adds an unrelated crop-conditioned teacher. The student learns to move toward the positive teacher and away from the negative teacher, at selected token positions.</p>
-          </div>
-
-          <div class="method-player" data-step="0">
-            <div class="player-top">
-              <div><span class="small-label">Figure 3 / Training pipeline</span><h3>What is the color of the little girl's shirt?</h3></div>
-              <div class="player-controls">
-                <button class="icon-button play-button" type="button" aria-label="Pause animation" title="Pause animation"><i data-lucide="pause"></i></button>
-                <button class="icon-button restart-button" type="button" aria-label="Restart animation" title="Restart animation"><i data-lucide="rotate-ccw"></i></button>
+            <div class="cdl-visual">
+              <p class="small-label">Discrepancies from the student π</p>
+              <div class="distance-axis"><span>0</span><span>log 2 ≈ 0.693</span></div>
+              <div class="distance-row positive-distance"><div><span>Positive teacher τ<sup>+</sup></span><span id="positive-distance-label">0.30</span></div><div class="distance-track" aria-hidden="true"><span id="positive-distance-bar" style="width:43.28%"></span></div></div>
+              <div class="distance-row negative-distance"><div><span>Negative teacher τ<sup>−</sup></span><span id="negative-distance-label">0.20</span></div><div class="distance-track" aria-hidden="true"><span id="negative-distance-bar" style="width:28.85%"></span></div></div>
+              <p class="demo-copy">Separate JSD magnitudes on a common scale, not geometric positions of three distributions. Natural logarithms give 0 ≤ D<sub>JS</sub> ≤ log 2; the paper requires 0 &lt; μ &lt; log 2.</p>
+              <div class="loss-readout" aria-live="polite" aria-atomic="true">
+                <div><span>Token CDL loss</span><output id="cdl-loss" for="cdl-positive cdl-negative cdl-margin">0.20</output></div>
+                <strong id="cdl-state" data-satisfied="false">Margin Violated</strong>
+                <p id="cdl-condition">d− − d+ = −0.10 &lt; μ = 0.10</p>
+                <p id="cdl-explanation">A contrastive penalty remains. This readout is before sample and token gating.</p>
               </div>
             </div>
-            <div class="step-tabs" role="tablist" aria-label="Training stages">
-              <button type="button" id="step-0" role="tab" aria-selected="true" aria-controls="stage-detail" data-step="0"><span>01</span>Roll out</button>
-              <button type="button" id="step-1" role="tab" aria-selected="false" aria-controls="stage-detail" tabindex="-1" data-step="1"><span>02</span>Contrast views</button>
-              <button type="button" id="step-2" role="tab" aria-selected="false" aria-controls="stage-detail" tabindex="-1" data-step="2"><span>03</span>Select tokens</button>
-              <button type="button" id="step-3" role="tab" aria-selected="false" aria-controls="stage-detail" tabindex="-1" data-step="3"><span>04</span>Apply CDL</button>
-              <button type="button" id="step-4" role="tab" aria-selected="false" aria-controls="stage-detail" tabindex="-1" data-step="4"><span>05</span>Update</button>
-            </div>
-
-            <div class="pipeline-scroll" tabindex="0" role="region" aria-label="Figure 3 training diagram">
-              <div class="pipeline">
-                <div class="column-head head-vision">Visual input</div>
-                <div class="column-head head-model">Policy</div>
-                <div class="column-head head-tokens">Token distributions</div>
-                <div class="column-head head-objective">Supervision</div>
-
-                <div class="visual-input student-input stage-rollout">
-                  <img src="paper_assets/method-full.png" width="166" height="122" alt="Original full image from Figure 3, containing the little girl." />
-                  <span><b>V</b> Full image</span>
-                </div>
-                <div class="policy student-policy stage-rollout stage-update">
-                  <span class="policy-kind"><i data-lucide="cpu"></i>Student</span><strong>π<sub>θ</sub></strong><small>Qwen3.5-4B</small>
-                </div>
-                <div class="token-row student-tokens stage-rollout">
-                  <span class="distribution-label">Student rollout <b>π</b></span>
-                  <div class="tokens"><span>It's</span><span>a</span><span class="token-error">black</span><span>shirt</span><span class="token-eos">EOS</span></div>
-                  <small>Illustrative error token from Figure 3</small>
-                </div>
-
-                <div class="visual-input positive-input stage-teachers">
-                  <img src="paper_assets/method-positive.png" width="104" height="106" alt="Figure 3 positive crop containing the girl's pink shirt." />
-                  <span><b>R<sup>+</sup></b> Relevant crop</span>
-                </div>
-                <div class="policy positive-policy stage-teachers">
-                  <span class="policy-kind"><i data-lucide="cpu"></i>Positive teacher</span><strong>τ<sup>+</sup></strong><small>Shared parameters ϕ</small>
-                </div>
-                <div class="token-row positive-tokens stage-teachers stage-gate">
-                  <span class="distribution-label">Positive distribution <b>τ<sup>+</sup></b></span>
-                  <div class="tokens"><span>The</span><span>a</span><span class="token-positive">pink</span><span>shirt</span><span class="token-eos">EOS</span></div>
-                  <small>Correction supported by the shirt crop</small>
-                </div>
-
-                <div class="visual-input negative-input stage-teachers">
-                  <img src="paper_assets/method-negative.png" width="50" height="34" alt="Figure 3 negative crop of the ground, unrelated to the shirt color." />
-                  <span><b>R<sup>−</sup></b> Unrelated crop</span>
-                </div>
-                <div class="policy negative-policy stage-teachers">
-                  <span class="policy-kind"><i data-lucide="cpu"></i>Negative teacher</span><strong>τ<sup>−</sup></strong><small>Shared parameters ϕ</small>
-                </div>
-                <div class="token-row negative-tokens stage-teachers">
-                  <span class="distribution-label">Negative distribution <b>τ<sup>−</sup></b></span>
-                  <div class="tokens"><span>The</span><span>a</span><span class="token-negative">ceramic</span><span class="token-negative">ground</span><span class="token-eos">EOS</span></div>
-                  <small>Unrelated content from the ground crop</small>
-                </div>
-
-                <div class="shared-prefix stage-teachers"><i data-lucide="git-branch"></i><span>Both teachers reuse <strong>C<sub>i,t</sub> = (Q, A<sub>&lt;t</sub>)</strong><small>Same student prefix · only the crop changes</small></span></div>
-                <div class="objectives">
-                  <div class="objective jsd-objective stage-rollout stage-update"><span class="objective-name"><b>JSD</b>Positive alignment</span><p>D<sub>JS</sub>(π, τ<sup>+</sup>)</p><small>Retained samples receive distillation.</small></div>
-                  <div class="objective gate-objective stage-gate"><span class="objective-name"><b>DAG</b>Token selection</span><p>d<sub>i,t</sub> &gt; d̄<sub>B</sub></p><small>d = D<sub>JS</sub>(student, positive teacher)</small><div class="gate-positions" aria-label="Illustrative selected token positions"><span></span><span></span><span class="selected"></span><span></span><span></span></div></div>
-                  <div class="objective cdl-objective stage-contrast"><span class="objective-name"><b>CDL</b>Margin constraint</span><p>[μ + d<sup>+</sup> − d<sup>−</sup>]<sub>+</sub></p><div class="distribution-motion" role="img" aria-label="Schematic: the student distribution moves closer to the positive teacher and farther from the negative teacher, until the margin is met."><span class="dist-positive">τ<sup>+</sup></span><span class="dist-student">π</span><span class="dist-negative">τ<sup>−</sup></span></div><div class="pull-push"><span>← toward τ<sup>+</sup></span><span>away from τ<sup>−</sup> →</span></div></div>
-                </div>
-                <div class="sample-gate stage-rollout stage-gate"><i data-lucide="filter"></i><span><strong>Sample gate</strong> Retain the example if at least one of its rollouts is correct.</span></div>
-                <div class="ema-loop stage-update"><i data-lucide="refresh-cw"></i><span><strong>Update student θ</strong><span class="ema-arrow">→</span>EMA teacher update <b>ϕ ← (1 − η)ϕ + ηθ</b></span></div>
-              </div>
-            </div>
-
-            <div class="stage-detail" id="stage-detail" role="tabpanel" aria-labelledby="step-0">
-              <span class="stage-index">01 / 05</span>
-              <div><h3 class="stage-title">The student starts with the full image.</h3><p class="stage-description">It samples its own responses. Keep a training example when at least one rollout is correct; incorrect rollouts of that retained example are still available for correction.</p></div>
-              <span class="stage-reference">Eq. 6, 13</span>
-            </div>
-            <div class="playback-track" aria-hidden="true"><span></span></div>
           </div>
+          <p class="demo-disclaimer" id="cdl-disclaimer">Illustrative visualization of the CDL objective, not measured training dynamics. The independently adjustable discrepancies are scalar examples, not a reconstruction of a jointly realizable set of model distributions.</p>
+        </article>
 
-          <div class="method-notes">
-            <p><strong>Controlled comparison.</strong> R<sup>−</sup> comes from the same image, matches R<sup>+</sup> in size, and satisfies IoU(R<sup>+</sup>, R<sup>−</sup>) ≤ δ. One negative crop is shared across a sample's rollouts.</p>
-            <p><strong>Distribution-level supervision.</strong> The words above are the paper's illustrative token outputs, not three independently generated answers. Both teacher distributions are evaluated on the student's prefix.</p>
+        <article class="technical-demo" id="dag-demo" aria-labelledby="dag-demo-title">
+          <div class="demo-heading"><h4 id="dag-demo-title">DAG · Token-level selection</h4><span class="section-source">Eq. 12 · Illustrative example</span></div>
+          <p class="demo-copy">The evidence score is d<sub>i,t</sub> = D<sub>JS</sub>(π<sub>i,t</sub>, τ<sup>+</sup><sub>i,t</sub>), over the full vocabulary. The actual threshold d̄<sub>B</sub> is the mean over valid response-token positions in the retained batch, not a learned parameter or the mean of this one sentence.</p>
+          <div class="gate-summary"><span class="math-inline">g<sub>i,t</sub> = 𝟙[d<sub>i,t</sub> &gt; d̄<sub>B</sub>]</span><output id="dag-count" for="dag-threshold" aria-live="polite">2 / 7 pass the token gate</output></div>
+          <div class="token-demo-scroll">
+            <div class="token-chart" role="img" aria-label="Illustrative discrepancies: The 0.04, little 0.12, girl's 0.18, shirt 0.44, is 0.09, black 0.56, period 0.07. Threshold 0.25; shirt and black pass the strict greater-than gate.">
+              <div class="threshold-line" style="bottom:36.07%" aria-hidden="true"></div>
+              <div class="token-column" data-discrepancy="0.04"><span class="token-value">0.04</span><div class="token-bar" style="height:5.77%"></div><span class="token-word">The</span><span class="token-state">Skip</span></div>
+              <div class="token-column" data-discrepancy="0.12"><span class="token-value">0.12</span><div class="token-bar" style="height:17.31%"></div><span class="token-word">little</span><span class="token-state">Skip</span></div>
+              <div class="token-column" data-discrepancy="0.18"><span class="token-value">0.18</span><div class="token-bar" style="height:25.97%"></div><span class="token-word">girl's</span><span class="token-state">Skip</span></div>
+              <div class="token-column is-selected" data-discrepancy="0.44"><span class="token-value">0.44</span><div class="token-bar" style="height:63.48%"></div><span class="token-word">shirt</span><span class="token-state">Pass</span></div>
+              <div class="token-column" data-discrepancy="0.09"><span class="token-value">0.09</span><div class="token-bar" style="height:12.98%"></div><span class="token-word">is</span><span class="token-state">Skip</span></div>
+              <div class="token-column is-selected" data-discrepancy="0.56"><span class="token-value">0.56</span><div class="token-bar" style="height:80.79%"></div><span class="token-word">black</span><span class="token-state">Pass</span></div>
+              <div class="token-column" data-discrepancy="0.07"><span class="token-value">0.07</span><div class="token-bar" style="height:10.10%"></div><span class="token-word">.</span><span class="token-state">Skip</span></div>
+            </div>
           </div>
-          <details class="paper-details">
-            <summary><span><i data-lucide="scan-line"></i>Original Figure 3</span><i data-lucide="chevron-down"></i></summary>
-            <figure><button class="figure-button" type="button" data-figure="paper_assets/figure-3-hires.png" data-caption="Figure 3 · Original CV-OPD pipeline, paper page 5" aria-label="Enlarge original Figure 3"><img src="paper_assets/figure-3-hires.png" width="1592" height="828" alt="Original Figure 3 showing visual inputs, student and shared teachers, rollout token examples, JSD, discrepancy-aware gating, contrastive divergence and EMA." loading="lazy" /></button><figcaption>Figure 3, p. 5 · Method definitions: §3.1–3.4. Training procedure: Algorithm 1, p. 14.</figcaption></figure>
-          </details>
+          <div class="chart-legend"><span><i class="legend-selected" aria-hidden="true"></i>Passes token gate</span><span><i class="legend-unselected" aria-hidden="true"></i>Not selected</span><span><i class="legend-threshold" aria-hidden="true"></i>Simulated threshold</span></div>
+          <fieldset class="demo-controls threshold-control" disabled>
+            <legend class="visually-hidden">Simulated DAG threshold</legend>
+            <label for="dag-threshold"><span>Simulated batch-mean threshold</span><output id="dag-threshold-value" for="dag-threshold">0.25</output></label>
+            <input id="dag-threshold" type="range" min="0" max="0.69" step="0.01" value="0.25" aria-describedby="dag-disclaimer" />
+          </fieldset>
+          <p class="demo-disclaimer" id="dag-disclaimer">Illustrative example: word-level units and invented discrepancy scores, not the model's tokenizer or recorded activations. The adjustable threshold represents hypothetical batch means. Selection does not certify correctness or identify an answer token; equality does not pass the gate.</p>
 
-          <div class="objective-summary">
-            <div><p class="eyebrow">The training objective</p><h3>Align. Select. Contrast.</h3></div>
-            <div class="loss-equation"><span class="math">L = L<sub>OPD</sub> + λL<sub>CDL</sub><sup>gated</sup></span><p>JSD aligns with the positive teacher. DAG selects positions for CDL. The contrastive loss becomes zero once d<sup>−</sup> − d<sup>+</sup> ≥ μ.</p></div>
+          <div class="sample-filter">
+            <div class="demo-heading"><h4>Sample-level filtering</h4><span class="section-source">Eq. 13 · Eight rollouts in §4.1</span></div>
+            <p class="demo-copy">b = 𝟙[Σ<sub>i=1</sub><sup>M</sup> r<sub>i</sub> &gt; 0], where r<sub>i</sub> records final-answer correctness. All incorrect means the sample is excluded from both JSD and CDL. One correct rollout is sufficient to retain the sample, including its incorrect rollouts.</p>
+            <fieldset class="sample-options" disabled>
+              <legend>Illustrative rollout outcomes</legend>
+              <label><input type="radio" name="sample-case" value="filtered" />All eight incorrect</label>
+              <label><input type="radio" name="sample-case" value="retained" checked />At least one correct</label>
+            </fieldset>
+            <ol class="rollout-grid" aria-label="Eight illustrative rollout outcomes">
+              <li><span>1</span><strong>Incorrect</strong></li><li><span>2</span><strong>Incorrect</strong></li>
+              <li class="is-correct"><span>3</span><strong>Correct</strong></li><li><span>4</span><strong>Incorrect</strong></li>
+              <li><span>5</span><strong>Incorrect</strong></li><li><span>6</span><strong>Incorrect</strong></li>
+              <li><span>7</span><strong>Incorrect</strong></li><li><span>8</span><strong>Incorrect</strong></li>
+            </ol>
+            <p class="sample-result" aria-live="polite" aria-atomic="true"><strong id="sample-status">Sample retained · b = 1</strong><span id="sample-effect">JSD remains active; 2 of the 7 illustrative positions are eligible for CDL, subject to the margin.</span></p>
+            <p class="demo-copy">The sample gate determines eligibility for distillation; the token gate only controls the additional CDL term. Retention does not guarantee that the teacher can correct every erroneous prefix.</p>
           </div>
-        </div>
+        </article>
+
+        <details class="objective-details">
+          <summary>From the per-token demonstration to the training objective <span class="detail-reference">Eq. 14 · Algorithm 1</span></summary>
+          <div class="objective-content">
+            <p class="objective-formula math-inline">L(θ) = E<sub>D</sub> [ b/M · Σ<sub>i=1</sub><sup>M</sup> Σ<sub>t=1</sub><sup>Tᵢ</sup> (w<sup>JSD</sup><sub>i,t</sub> d<sub>i,t</sub> + λ g<sub>i,t</sub> w<sup>CDL</sup><sub>i,t</sub> [μ + d̃<sup>+</sup><sub>i,t</sub> − d̃<sup>−</sup><sub>i,t</sub>]<sub>+</sub>) ]</p>
+            <p>Equation 14 aggregates token losses over rollouts and examples. The sample gate b multiplies both terms; g<sub>i,t</sub> gates only CDL. The paper specifies normalized token weights, using 1/T<sub>i</sub> in practice. The expectation includes examples, crop sampling and on-policy rollouts.</p>
+            <p><strong>Algorithm 1 gives a separate normalization convention:</strong> accumulated positive-teacher distillation is divided by its weight sum N + ε, while accumulated selected-token CDL is divided by selected-token count G + ε. The slider readout is the unaggregated hinge term, not either full training loss.</p>
+            <p><strong>Distribution support:</strong> CDL and DAG use full-vocabulary JSD. The primary distillation term uses student-aligned Top-100 + tail distributions with β = 0.5 (§4.1; Algorithm 1).</p>
+            <p><strong>Reported settings:</strong> μ = 0.1, λ = 0.1, eight rollouts, negative-crop IoU ≤ 0.1. After the student update, the shared teacher follows ϕ ← (1 − τ)ϕ + τθ with τ = 0.05 (Appendix A.2; Algorithm 1). The two teacher branches are not independently optimized.</p>
+          </div>
+        </details>
+        <noscript><p class="table-note">The diagrams show fixed illustrative values: CDL = 0.20 and two token positions pass a simulated threshold of 0.25. The paper definitions and all experimental results remain available below.</p></noscript>
       </section>
 
-      <section class="section band" id="results">
-        <div class="container">
-          <div class="section-heading">
-            <div><p class="eyebrow">03 / Results</p><h2>Better grounding.<br />Measurable gains.</h2></div>
-            <p>Paper-reported evaluation on six fine-grained visual benchmarks. The comparison below uses the same Qwen3.5-4B backbone and the paper's non-thinking evaluation setting.</p>
-          </div>
-          <div class="result-metrics">
-            <div><strong>78.22<span>%</span></strong><p>Average accuracy across six benchmarks</p><small>CV-OPD · Table 1</small></div>
-            <div><strong>+2.30<span> pp</span></strong><p>Average gain over Vision-OPD</p><small>78.22 − 75.92 · Table 1</small></div>
-            <div><strong>+2.60<span> pp</span></strong><p>Gain on ZoomBench</p><small>62.01 − 59.41 · Table 1</small></div>
-          </div>
-          <div class="table-scroll" role="region" tabindex="0" aria-label="Benchmark results">
-            <table>
-              <caption>Table 1 · Selected Qwen3.5-4B baselines · Accuracy (%)</caption>
-              <thead><tr><th scope="col">Method</th><th scope="col">V*</th><th scope="col">Zoom</th><th scope="col">HR 4K</th><th scope="col">HR 8K</th><th scope="col">MME EN</th><th scope="col">MME CN</th><th scope="col">Avg6</th></tr></thead>
+      <section class="section container" id="results" aria-labelledby="results-title">
+        <div class="section-heading"><h2 id="results-title"><span class="section-number">03</span>Main Results</h2><span class="section-source">§4.2 · Table 1</span></div>
+        <p class="section-lede">CV-OPD reaches <strong>78.22% Avg6</strong>, compared with 75.92% for Vision-OPD, a gain of <strong>2.30 percentage points</strong>. The table reports the complete Qwen3.5-based block from the paper.</p>
+        <dl class="experiment-setting">
+          <div><dt>Backbone</dt><dd>Qwen3.5-4B</dd></div>
+          <div><dt>Training data</dt><dd>6.2K samples</dd></div>
+          <div><dt>Evaluation mode</dt><dd>Non-thinking</dd></div>
+          <div><dt>Metric</dt><dd>Accuracy (%)</dd></div>
+        </dl>
+        <div class="results-table-wrap">
+          <table class="benchmark-table">
+            <caption>Table 1. Qwen3.5-based models. Avg6 is the unweighted mean across six benchmarks.</caption>
+            <thead><tr><th scope="col">Method</th><th scope="col">V* Bench</th><th scope="col">ZoomBench</th><th scope="col">HR-Bench<br />4K</th><th scope="col">HR-Bench<br />8K</th><th scope="col">MME-RealWorld<br />EN</th><th scope="col">MME-RealWorld<br />CN</th><th scope="col">Avg6</th></tr></thead>
+            <tbody>
+              <tr><th scope="row">Qwen3.5 (Base)</th><td data-label="V* Bench">82.20</td><td data-label="ZoomBench">48.40</td><td data-label="HR-Bench 4K">86.38</td><td data-label="HR-Bench 8K">82.00</td><td data-label="MME-RealWorld EN">63.94</td><td data-label="MME-RealWorld CN">63.80</td><td data-label="Avg6">71.12</td></tr>
+              <tr><th scope="row">GRPO</th><td data-label="V* Bench">81.68</td><td data-label="ZoomBench">56.57</td><td data-label="HR-Bench 4K">76.75</td><td data-label="HR-Bench 8K">75.62</td><td data-label="MME-RealWorld EN">71.10</td><td data-label="MME-RealWorld CN">68.58</td><td data-label="Avg6">71.72</td></tr>
+              <tr><th scope="row">VAD</th><td data-label="V* Bench">91.62</td><td data-label="ZoomBench">60.12</td><td data-label="HR-Bench 4K">85.13</td><td data-label="HR-Bench 8K">83.38</td><td data-label="MME-RealWorld EN">76.98</td><td data-label="MME-RealWorld CN">71.44</td><td data-label="Avg6">78.11</td></tr>
+              <tr><th scope="row">VA-OPD</th><td data-label="V* Bench">86.91</td><td data-label="ZoomBench">60.36</td><td data-label="HR-Bench 4K">81.62</td><td data-label="HR-Bench 8K">78.12</td><td data-label="MME-RealWorld EN">73.29</td><td data-label="MME-RealWorld CN">67.42</td><td data-label="Avg6">74.62</td></tr>
+              <tr><th scope="row">V-Zero</th><td data-label="V* Bench">88.48</td><td data-label="ZoomBench">56.45</td><td data-label="HR-Bench 4K">84.88</td><td data-label="HR-Bench 8K">78.75</td><td data-label="MME-RealWorld EN">73.49</td><td data-label="MME-RealWorld CN">70.45</td><td data-label="Avg6">75.42</td></tr>
+              <tr><th scope="row">Vision-OPD</th><td data-label="V* Bench">89.53</td><td data-label="ZoomBench">59.41</td><td data-label="HR-Bench 4K">81.75</td><td data-label="HR-Bench 8K">80.12</td><td data-label="MME-RealWorld EN">74.51</td><td data-label="MME-RealWorld CN">70.17</td><td data-label="Avg6">75.92</td></tr>
+              <tr><th scope="row">Decomposed OPD</th><td data-label="V* Bench">89.80</td><td data-label="ZoomBench">58.70</td><td data-label="HR-Bench 4K">82.60</td><td data-label="HR-Bench 8K">79.50</td><td data-label="MME-RealWorld EN">73.80</td><td data-label="MME-RealWorld CN">67.82</td><td data-label="Avg6">75.37</td></tr>
+              <tr class="ours"><th scope="row">CV-OPD <span>Ours</span></th><td data-label="V* Bench">91.62</td><td data-label="ZoomBench">62.01</td><td data-label="HR-Bench 4K">84.38</td><td data-label="HR-Bench 8K">83.38</td><td data-label="MME-RealWorld EN">76.99</td><td data-label="MME-RealWorld CN">70.93</td><td data-label="Avg6"><strong>78.22</strong></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="table-note"><strong>Scope of the result.</strong> CV-OPD improves on Vision-OPD across all six benchmarks. It does not lead every individual benchmark: for example, the base model remains higher on HR-Bench 4K, and VAD is higher on MME-RealWorld CN. All values are paper-reported results.</p>
+      </section>
+
+      <section class="section container" id="ablations" aria-labelledby="ablations-title">
+        <div class="section-heading"><h2 id="ablations-title"><span class="section-number">04</span>Ablation Study</h2><span class="section-source">§4.3 · Tables 2–4</span></div>
+        <p class="section-lede">Controlled ablations examine the objective, negative-crop construction, and token-gating threshold. Values below are Avg6 accuracy (%).</p>
+        <div class="ablation-grid">
+          <article>
+            <h3>CDL and DAG</h3>
+            <table class="compact-table">
+              <caption>Table 2 · Component ablation</caption>
+              <thead><tr><th scope="col">CDL</th><th scope="col">DAG</th><th scope="col">Avg6</th></tr></thead>
               <tbody>
-                <tr><th scope="row">Base model</th><td>82.20</td><td>48.40</td><td>86.38</td><td>82.00</td><td>63.94</td><td>63.80</td><td>71.12</td></tr>
-                <tr><th scope="row">Vision-OPD</th><td>89.53</td><td>59.41</td><td>81.75</td><td>80.12</td><td>74.51</td><td>70.17</td><td>75.92</td></tr>
-                <tr><th scope="row">VAD</th><td>91.62</td><td>60.12</td><td>85.13</td><td>83.38</td><td>76.98</td><td>71.44</td><td>78.11</td></tr>
-                <tr class="ours"><th scope="row">CV-OPD <span>Ours</span></th><td>91.62</td><td>62.01</td><td>84.38</td><td>83.38</td><td>76.99</td><td>70.93</td><td><strong>78.22</strong></td></tr>
+                <tr><th scope="row">Without</th><td>Without</td><td>75.92</td></tr>
+                <tr><th scope="row">Without</th><td>With</td><td>76.81</td></tr>
+                <tr><th scope="row">With</th><td>Without</td><td>76.88</td></tr>
+                <tr class="ours"><th scope="row">With</th><td>With</td><td><strong>78.22</strong></td></tr>
               </tbody>
             </table>
-          </div>
-          <p class="table-note">Avg6 is the unweighted mean. CV-OPD improves on Vision-OPD across all six benchmarks; it does not outperform every comparator on every individual benchmark. On HR-Bench 4K, the base model remains higher.</p>
-          <div class="ablation">
-            <div><span class="small-label">Table 2 / Component ablation</span><h3>Both components contribute.</h3><p>Removing either the contrastive objective or the gate reduces average accuracy.</p></div>
-            <div class="ablation-bars" aria-label="Average accuracy: neither component 75.92, DAG only 76.81, CDL only 76.88, full CV-OPD 78.22">
-              <div><span>Neither</span><div class="bar-track"><span style="--value:75.92%"></span></div><b>75.92</b></div>
-              <div><span>DAG only</span><div class="bar-track"><span style="--value:76.81%"></span></div><b>76.81</b></div>
-              <div><span>CDL only</span><div class="bar-track"><span style="--value:76.88%"></span></div><b>76.88</b></div>
-              <div class="full"><span>CDL + DAG</span><div class="bar-track"><span style="--value:78.22%"></span></div><b>78.22</b></div>
-              <div class="bar-axis"><span>Avg6 (%)</span><span>0</span><span>100</span></div>
+            <p>Removing either CDL or DAG reduces Avg6. Their combination achieves the highest score in this ablation.</p>
+          </article>
+          <article>
+            <h3>Negative region</h3>
+            <table class="compact-table">
+              <caption>Table 3 · Crop selection</caption>
+              <thead><tr><th scope="col">Strategy</th><th scope="col">Avg6</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">Base</th><td>71.12</td></tr>
+                <tr><th scope="row">All Black</th><td>76.76</td></tr>
+                <tr><th scope="row">Random Crop</th><td>77.20</td></tr>
+                <tr><th scope="row">Neighbor Crop</th><td>76.40</td></tr>
+                <tr class="ours"><th scope="row">CV-OPD</th><td><strong>78.22</strong></td></tr>
+              </tbody>
+            </table>
+            <p>Random Crop samples a new negative for each rollout. CV-OPD shares one negative crop across the sample's eight rollouts.</p>
+          </article>
+          <article>
+            <h3>DAG threshold</h3>
+            <table class="compact-table">
+              <caption>Table 4 · Threshold reference</caption>
+              <thead><tr><th scope="col">Threshold</th><th scope="col">Avg6</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">Without DAG</th><td>76.88</td></tr>
+                <tr><th scope="row">Rollout mean</th><td>77.08</td></tr>
+                <tr class="ours"><th scope="row">Batch mean</th><td><strong>78.22</strong></td></tr>
+              </tbody>
+            </table>
+            <p>Using the batch-mean discrepancy outperforms the rollout-mean threshold in the reported experiment.</p>
+          </article>
+        </div>
+        <div class="extended-ablation" id="extended-ablations">
+          <h3>Why Does CV-OPD Work?</h3>
+          <p>The reported ablations favor the final negative-crop construction and a batch-level discrepancy threshold. They support these design choices, but do not independently establish the proposed causal explanations.</p>
+          <details class="analysis-details" id="negative-ablation">
+            <summary>Negative Teacher Construction<span>CV-OPD: 78.22 Avg6; Random Crop: 77.20. One negative crop is shared across eight rollouts.</span></summary>
+            <div class="ablation-detail-grid">
+              <div>
+                <h4>How to Construct an Effective Negative Teacher?</h4>
+                <dl class="strategy-definitions">
+                  <dt>All Black</dt><dd>An all-black visual input provides the negative condition, replacing a sampled region with no visible scene content (§4.3.2).</dd>
+                  <dt>Neighbor Crop</dt><dd>A region neighboring the target supplies the negative input. It may still contain answer-relevant information, potentially creating conflicting contrastive supervision.</dd>
+                  <dt>Random Crop</dt><dd>Each rollout independently samples a negative region. The general negative-region construction draws from the same image (§3.1); the ablation paragraph does not separately restate all spatial constraints for this variant.</dd>
+                  <dt>CV-OPD</dt><dd>One answer-irrelevant region from the same image is shared across all eight rollouts. Its height and width match the positive crop, with IoU(R<sup>+</sup>, R<sup>−</sup>) ≤ δ; Appendix A.2 sets δ = 0.1. Low overlap alone does not certify semantic irrelevance.</dd>
+                </dl>
+              </div>
+              <div>
+                <table class="evidence-table" id="negative-strategy-table">
+                  <caption>Table 3 · Avg6 accuracy (%). Gap is CV-OPD minus the row score, in percentage points.</caption>
+                  <thead><tr><th scope="col">Negative strategy</th><th scope="col">Avg6</th><th scope="col">Gap (pp)</th></tr></thead>
+                  <tbody>
+                    <tr><th scope="row">All Black</th><td>76.76</td><td>1.46</td></tr>
+                    <tr><th scope="row">Neighbor Crop</th><td>76.40</td><td>1.82</td></tr>
+                    <tr><th scope="row">Random Crop</th><td>77.20</td><td>1.02</td></tr>
+                    <tr class="ours"><th scope="row">CV-OPD</th><td>78.22</td><td>0.00</td></tr>
+                  </tbody>
+                </table>
+                <p class="analysis-note"><strong>Observed.</strong> CV-OPD has the highest Avg6 among these constructions; Neighbor Crop is lowest and also below the no-CDL variant's 76.81 (Table 2).</p>
+                <p class="analysis-note"><strong>Interpretation (§4.3.2).</strong> Nearby regions may contain relevant evidence. Sharing a negative crop may reduce variation in contrastive gradients and maintain a consistent reference within a sample; the reported comparison does not isolate this explanation as a causal effect.</p>
+              </div>
             </div>
-          </div>
+          </details>
+          <details class="analysis-details" id="gate-ablation">
+            <summary>Gate Strategy<span>Batch mean: 78.22 Avg6; rollout mean: 77.08. A standalone sample-filter ablation is not reported.</span></summary>
+            <div class="ablation-detail-grid">
+              <div>
+                <h4>How to Select Reliable Distillation Signals?</h4>
+                <dl class="strategy-definitions">
+                  <dt>Sample-level filtering · Eq. 13</dt><dd>Exclude a sample only when every rollout is incorrect. This controls both positive distillation and CDL, not just the contrastive term.</dd>
+                  <dt>Token-level gating · Eq. 12</dt><dd>Within retained samples, add CDL only where student–positive-teacher full-vocabulary JSD strictly exceeds the threshold. Other valid positions still receive positive distillation.</dd>
+                  <dt>Rollout mean vs. batch mean · Table 4</dt><dd>A rollout mean provides a local reference; the proposed batch mean pools valid positions across retained trajectories. The paper argues that short responses can make a rollout mean sensitive to a few positions (§4.3.3).</dd>
+                </dl>
+                <p class="analysis-note"><strong>Evidence boundary.</strong> Table 2 removes DAG as a component; Table 4 changes the threshold reference. Neither reports an independently isolated sample-filter-only or token-gate-only comparison, so no separate effect size is assigned here.</p>
+              </div>
+              <div>
+                <table class="evidence-table" id="gate-strategy-table">
+                  <caption>Table 4 · Reported DAG threshold configurations, Avg6 accuracy (%).</caption>
+                  <thead><tr><th scope="col">Gate setting</th><th scope="col">Avg6</th></tr></thead>
+                  <tbody>
+                    <tr><th scope="row">Without DAG</th><td>76.88</td></tr>
+                    <tr><th scope="row">DAG · Rollout mean</th><td>77.08</td></tr>
+                    <tr class="ours"><th scope="row">DAG · Batch mean</th><td>78.22</td></tr>
+                  </tbody>
+                </table>
+                <p class="analysis-note"><strong>Observed.</strong> Batch-level thresholding exceeds rollout-level thresholding by 1.14 percentage points. With neither CDL nor DAG, Avg6 is 75.92 (Table 2).</p>
+                <p class="analysis-note"><strong>Interpretation.</strong> The results are consistent with a more useful shared reference for token selection. They do not show that every selected position is visually grounded, nor do these tables report statistical significance.</p>
+              </div>
+            </div>
+          </details>
         </div>
       </section>
 
-      <section class="section" id="evidence">
-        <div class="container">
-          <div class="section-heading">
-            <div><p class="eyebrow">04 / Visual evidence</p><h2>Look at the object.<br />Respect what is missing.</h2></div>
-            <p>Attention and response examples make the distinction concrete: identifying a lock's color is different from recognizing when the relevant pixels are unavailable.</p>
+      <section class="section container" id="evidence" aria-labelledby="evidence-title">
+        <div class="section-heading"><h2 id="evidence-title"><span class="section-number">05</span>Qualitative Results</h2><span class="section-source">Figures 1–2 & 4–7</span></div>
+        <p class="section-lede"><strong>A correct answer is not necessarily a visually grounded answer.</strong> Corruption tests and attention examples examine whether model responses depend on the answer-relevant visual evidence.</p>
+        <figure class="observation-figure">
+          <button class="figure-button" type="button" data-figure="./paper_assets/figure-1-hires.png" data-caption="Figure 1 · Evidence availability and model behavior" aria-label="Enlarge Figure 1">
+            <img src="./paper_assets/figure-1-hires.png" width="1640" height="652" alt="Figure 1: after the girl's shirt is hidden, Vision-OPD still predicts pink, while CV-OPD acknowledges missing color evidence. The right panel compares benchmark accuracy and masked-input error." loading="lazy" />
+            <span class="expand-icon" aria-hidden="true"><i data-lucide="maximize-2"></i></span>
+          </button>
+          <figcaption><strong>Figure 1. Visual shortcut observation.</strong> An expected answer can persist after its supporting evidence is removed. CV-OPD's response in this example acknowledges the unavailable shirt-color evidence.</figcaption>
+        </figure>
+        <details class="paper-details">
+          <summary><span>Corruption diagnostics and attention analysis <span class="detail-reference">Figure 2</span></span><i data-lucide="chevron-down"></i></summary>
+          <figure>
+            <button class="figure-button" type="button" data-figure="./paper_assets/figure-2-hires.png" data-caption="Figure 2 · Corruption diagnostics and Vision-OPD attention" aria-label="Enlarge Figure 2">
+              <img src="./paper_assets/figure-2-hires.png" width="1592" height="752" alt="Figure 2: black-mask and Gaussian-noise evaluation and Vision-OPD attention examples for a lock's color and a woman's pose." loading="lazy" />
+              <span class="expand-icon" aria-hidden="true"><i data-lucide="maximize-2"></i></span>
+            </button>
+            <figcaption><strong>Figure 2.</strong> Answer-related regions are replaced with black pixels or Gaussian noise. Attention examples examine whether Vision-OPD uses the relevant region (§2.2, p. 4).</figcaption>
+          </figure>
+        </details>
+
+        <div class="subsection-heading"><h3>Attention and response examples</h3><span class="section-source">Appendix · pp. 15–16</span></div>
+        <div class="case-tabs" role="tablist" aria-label="Paper evidence examples">
+          <button type="button" role="tab" id="case-tab-0" aria-selected="true" aria-controls="case-panel" data-case="0">Lock color <span>Fig. 4</span></button>
+          <button type="button" role="tab" id="case-tab-1" aria-selected="false" aria-controls="case-panel" tabindex="-1" data-case="1">Masked evidence <span>Fig. 5</span></button>
+          <button type="button" role="tab" id="case-tab-2" aria-selected="false" aria-controls="case-panel" tabindex="-1" data-case="2">Umbrella <span>Fig. 6</span></button>
+          <button type="button" role="tab" id="case-tab-3" aria-selected="false" aria-controls="case-panel" tabindex="-1" data-case="3">Glove <span>Fig. 7</span></button>
+        </div>
+        <div class="case-panel" id="case-panel" role="tabpanel" aria-labelledby="case-tab-0" tabindex="0">
+          <figure>
+            <p class="case-field-label">A. Visual Input</p>
+            <p class="case-input-note">Evidence present: the original mailbox image and both models' attention visualizations. The lock is the relevant object; the surrounding red mailbox is a potential distractor.</p>
+            <button class="figure-button case-figure" type="button" data-figure="./paper_assets/cvopd-figure-4-complete.png" data-caption="Figure 4 · Lock attention comparison" aria-label="Enlarge selected evidence figure">
+              <img class="case-image" src="./paper_assets/cvopd-figure-4-complete.png" width="1046" height="593" alt="Figure 4: Vision-OPD predicts the mailbox's dominant red; CV-OPD attends to the lock and predicts silver." loading="lazy" />
+              <span class="expand-icon" aria-hidden="true"><i data-lucide="maximize-2"></i></span>
+            </button>
+            <figcaption class="case-source">Figure 4 · Appendix A.4, p. 15</figcaption>
+          </figure>
+          <div class="case-copy">
+            <span class="small-label case-kicker">Evidence present</span>
+            <h4 class="case-title">Lock-color identification</h4>
+            <p class="case-field-label">B. Question</p>
+            <p class="case-question">What is the color of the lock?</p>
+            <p class="case-choices">(A) yellow · (B) silver · (C) golden · (D) red</p>
+            <div class="case-response-record">
+              <p class="case-field-label">C. Model Responses</p>
+              <p class="case-response-note">Vision-OPD: (D) red. CV-OPD: (B) silver. The complete recorded responses and attention maps are reproduced in the figure.</p>
+            </div>
+            <p class="case-field-label">D. Why It Matters</p>
+            <p class="case-description">Vision-OPD's red prediction matches the surrounding mailbox, while CV-OPD's silver prediction matches the lock.</p>
+            <p class="case-takeaway">The attention maps are consistent with this difference in the referenced visual regions.</p>
+            <p class="case-caveat">Attention is supporting evidence, not a sufficient causal proof of grounding.</p>
           </div>
-          <div class="case-tabs" role="tablist" aria-label="Paper evidence examples">
-            <button type="button" role="tab" id="case-tab-0" aria-selected="true" aria-controls="case-panel" data-case="0">Lock color <span>Fig. 4</span></button>
-            <button type="button" role="tab" id="case-tab-1" aria-selected="false" aria-controls="case-panel" tabindex="-1" data-case="1">Masked evidence <span>Fig. 5</span></button>
-            <button type="button" role="tab" id="case-tab-2" aria-selected="false" aria-controls="case-panel" tabindex="-1" data-case="2">Umbrella <span>Fig. 6</span></button>
-            <button type="button" role="tab" id="case-tab-3" aria-selected="false" aria-controls="case-panel" tabindex="-1" data-case="3">Glove <span>Fig. 7</span></button>
-          </div>
-          <div class="case-panel" id="case-panel" role="tabpanel" aria-labelledby="case-tab-0">
-            <figure><button class="figure-button case-figure" type="button" data-figure="paper_assets/cvopd-figure-4-complete.png" data-caption="Figure 4 · Lock attention comparison" aria-label="Enlarge selected evidence figure"><img class="case-image" src="paper_assets/cvopd-figure-4-complete.png" width="1046" height="593" alt="Figure 4: Vision-OPD predicts the mailbox's dominant red; CV-OPD attends to the lock and predicts silver." loading="lazy" /><span class="expand-icon" aria-hidden="true"><i data-lucide="maximize-2"></i></span></button><figcaption class="case-source">Figure 4 · Appendix A.4, p. 15</figcaption></figure>
-            <div class="case-copy"><span class="small-label case-kicker">Evidence present</span><h3 class="case-title">The lock is silver.<br />The mailbox is red.</h3><p class="case-description">Vision-OPD follows the mailbox's dominant red color. CV-OPD focuses on the lock itself and identifies its metallic silver color.</p><div class="case-conclusion"><i data-lucide="focus"></i><p class="case-takeaway">The relevant object, not the surrounding color, should determine the answer.</p></div><p class="case-caveat">A qualitative example of attention and response behavior, not a causal proof of grounding.</p></div>
-          </div>
+        </div>
+        <noscript><p class="table-note">Additional paper examples: <a href="./paper_assets/cvopd-figure-5-complete.png">Figure 5: masked evidence</a>, <a href="./paper_assets/cvopd-figure-6-complete.png">Figure 6: umbrella</a>, <a href="./paper_assets/cvopd-figure-7-complete.png">Figure 7: glove</a>.</p></noscript>
+      </section>
+
+      <section class="section container" id="citation" aria-labelledby="citation-title">
+        <div class="section-heading"><h2 id="citation-title"><span class="section-number">06</span>Citation</h2><span class="section-source">Anonymous manuscript</span></div>
+        <p class="section-lede">Bibliographic information follows the supplied double-blind manuscript. This entry identifies the submission, not an accepted proceedings publication.</p>
+        <div class="citation-block">
+          <div class="citation-toolbar"><span>BibTeX</span><span class="copy-status" role="status" aria-live="polite"></span><button class="icon-button copy-citation" type="button" aria-label="Copy BibTeX citation" title="Copy BibTeX citation"><i data-lucide="copy"></i></button><a class="icon-button" href="./paper_assets/cvopd.bib" download="cvopd.bib" aria-label="Download BibTeX citation" title="Download BibTeX citation"><i data-lucide="download"></i></a></div>
+          <pre><code id="bibtex">@misc{cvopd,
+  title = {{CV-OPD}: Contrastive Vision On-Policy Distillation},
+  author = {{Anonymous Authors}},
+  howpublished = {Manuscript under review},
+  note = {ICLR 2027 submission},
+  url = {https://haolin3419.github.io/Contrastive-Vision-OPD/}
+}</code></pre>
         </div>
       </section>
 
-      <section class="resources band" id="resources">
-        <div class="container resource-inner"><div><p class="eyebrow">Paper & implementation</p><h2>CV-OPD</h2><p>Contrastive Vision On-Policy Distillation</p></div><div class="paper-actions"><a class="button button-primary" href="CV_OPD_Contrastive_Vision_OPD_ICLR_27.pdf" target="_blank" rel="noopener"><i data-lucide="file-text"></i>Paper<i data-lucide="arrow-up-right"></i></a><a class="button" href="https://github.com/HaoLin3419/Contrastive-Vision-OPD" target="_blank" rel="noopener"><i data-lucide="github"></i>Code<i data-lucide="arrow-up-right"></i></a></div></div>
+      <section class="section container acknowledgements" id="acknowledgements" aria-labelledby="acknowledgements-title">
+        <div class="section-heading"><h2 id="acknowledgements-title">Acknowledgements</h2></div>
+        <div class="prose"><p>The experiments use Qwen3.5-4B and 6.2K visual reasoning samples from Vision-OPD. Figures and results on this page are reproduced from the accompanying manuscript. Website icons are provided by Lucide under its <a href="./paper_assets/lucide-LICENSE.txt">license</a>.</p></div>
       </section>
     </main>
-    <footer class="container"><span>CV-OPD · Research project</span><span>Figures and results from the accompanying manuscript.</span></footer>
-    <dialog class="figure-dialog" aria-label="Expanded paper figure">
-      <div class="dialog-toolbar"><p class="dialog-caption"></p><a class="icon-button dialog-original" href="paper_assets/figure-1-hires.png" target="_blank" rel="noopener" aria-label="Open original image" title="Open original image"><i data-lucide="external-link"></i></a><button class="icon-button dialog-close" type="button" aria-label="Close figure" title="Close figure"><i data-lucide="x"></i></button></div>
+
+    <footer class="container"><span>CV-OPD · Contrastive Vision On-Policy Distillation</span><a href="#top">Back to top <i data-lucide="arrow-up"></i></a></footer>
+    <dialog class="figure-dialog" aria-labelledby="dialog-caption">
+      <div class="dialog-toolbar"><p class="dialog-caption" id="dialog-caption"></p><a class="icon-button dialog-original" href="./paper_assets/figure-3-hires.png" target="_blank" rel="noopener" aria-label="Open original image" title="Open original image"><i data-lucide="external-link"></i></a><button class="icon-button dialog-close" type="button" aria-label="Close figure" title="Close figure"><i data-lucide="x"></i></button></div>
       <div class="dialog-image-scroll"><img class="dialog-image" alt="" /></div>
     </dialog>
   </body>

@@ -20,85 +20,6 @@ document.addEventListener("keydown", (event) => {
   if (event.key === "Escape") closeMenu();
 });
 
-const player = document.querySelector(".method-player");
-const tabs = [...player.querySelectorAll('[role="tab"]')];
-const play = player.querySelector(".play-button");
-const panel = player.querySelector(".stage-detail");
-const motionPreference = window.matchMedia("(prefers-reduced-motion: reduce)");
-const stages = [
-  {
-    title: "The student starts with the full image.",
-    description: "It samples its own responses. Keep a training example when at least one rollout is correct; incorrect rollouts of that retained example are still available for correction.",
-    reference: "Eq. 6, 13",
-  },
-  {
-    title: "Hold the prefix fixed. Change only the crop.",
-    description: "The positive teacher sees the shirt; the negative teacher sees unrelated ground. Both share parameters and score the same student prefix, so their distributions expose the effect of the visual input.",
-    reference: "Eq. 7–8",
-  },
-  {
-    title: "Select tokens using student–positive discrepancy.",
-    description: "DAG compares each token's full-vocabulary JSD between the student and positive teacher with the retained batch's mean. Only above-mean positions receive the additional contrastive loss.",
-    reference: "Eq. 12–13",
-  },
-  {
-    title: "Pull toward relevant evidence. Push away from irrelevant evidence.",
-    description: "CDL minimizes max(0, μ + d⁺ − d⁻). It moves the student closer to the positive distribution relative to the negative one, and stops pushing once the margin is satisfied.",
-    reference: "Eq. 9",
-  },
-  {
-    title: "Update the student, then refresh the shared teacher.",
-    description: "Combine positive-teacher JSD with gated CDL to update θ. An exponential moving average updates the shared teacher parameters ϕ. At inference, the student still receives only the full image and question.",
-    reference: "Eq. 14 / Alg. 1",
-  },
-];
-let currentStage = 0;
-let paused = motionPreference.matches;
-let visible = false;
-let timer;
-const duration = 8500;
-
-function resetProgress() {
-  const progress = player.querySelector(".playback-track > span");
-  progress.style.animation = "none";
-  void progress.offsetWidth;
-  progress.style.animation = "";
-}
-
-function schedule() {
-  window.clearTimeout(timer);
-  const stopped = paused || !visible || document.hidden;
-  player.classList.toggle("is-paused", stopped);
-  if (!stopped) timer = window.setTimeout(() => setStage(currentStage + 1), duration);
-}
-
-function setStage(index, userInitiated = false) {
-  currentStage = (index + stages.length) % stages.length;
-  player.dataset.step = String(currentStage);
-  const stage = stages[currentStage];
-  tabs.forEach((tab, i) => {
-    tab.setAttribute("aria-selected", String(i === currentStage));
-    tab.tabIndex = i === currentStage ? 0 : -1;
-  });
-  panel.setAttribute("aria-labelledby", `step-${currentStage}`);
-  panel.querySelector(".stage-index").textContent = `0${currentStage + 1} / 05`;
-  panel.querySelector(".stage-title").textContent = stage.title;
-  panel.querySelector(".stage-description").textContent = stage.description;
-  panel.querySelector(".stage-reference").textContent = stage.reference;
-  if (userInitiated) paused = true;
-  updatePlayButton();
-  resetProgress();
-  schedule();
-}
-
-function updatePlayButton() {
-  const label = paused ? "Play animation" : "Pause animation";
-  play.setAttribute("aria-label", label);
-  play.title = label;
-  play.innerHTML = `<i data-lucide="${paused ? "play" : "pause"}"></i>`;
-  iconRefresh();
-}
-
 function wireTabs(buttons, select) {
   buttons.forEach((button, index) => {
     button.addEventListener("click", () => select(index));
@@ -115,33 +36,71 @@ function wireTabs(buttons, select) {
     });
   });
 }
-wireTabs(tabs, (index) => setStage(index, true));
-play.addEventListener("click", () => {
-  paused = !paused;
-  updatePlayButton();
-  resetProgress();
-  schedule();
-});
-player.querySelector(".restart-button").addEventListener("click", () => {
-  paused = motionPreference.matches;
-  setStage(0);
-});
-motionPreference.addEventListener("change", (event) => {
-  paused = event.matches;
-  updatePlayButton();
-  schedule();
-});
-document.addEventListener("visibilitychange", schedule);
-if ("IntersectionObserver" in window) {
-  new IntersectionObserver(([entry]) => {
-    visible = entry.isIntersecting;
-    resetProgress();
-    schedule();
-  }, { threshold: 0.15 }).observe(player);
-} else {
-  visible = true;
+
+const cdlInputs = ["positive", "negative", "margin"].map((name) =>
+  document.querySelector(`#cdl-${name}`));
+function updateCDL() {
+  // Integer slider steps keep equality at the margin free of rounding errors.
+  const [positive, negative, margin] = cdlInputs.map((input) => Math.round(Number(input.value) * 100));
+  const loss = Math.max(0, margin + positive - negative);
+  const format = (value) => (value / 100).toFixed(2);
+  cdlInputs.forEach((input) => {
+    document.querySelector(`#${input.id}-value`).textContent = Number(input.value).toFixed(2);
+  });
+  for (const [name, value] of [["positive", positive], ["negative", negative]]) {
+    document.querySelector(`#${name}-distance-label`).textContent = format(value);
+    document.querySelector(`#${name}-distance-bar`).style.width = `${value / 100 / Math.LN2 * 100}%`;
+  }
+  document.querySelector("#cdl-loss").textContent = format(loss);
+  const status = document.querySelector("#cdl-state");
+  status.dataset.satisfied = String(loss === 0);
+  status.textContent = loss === 0 ? "Margin Satisfied" : "Margin Violated";
+  document.querySelector("#cdl-condition").textContent =
+    `d− − d+ = ${format(negative - positive)} ${loss === 0 ? "≥" : "<"} μ = ${format(margin)}`;
+  document.querySelector("#cdl-explanation").textContent = loss === 0
+    ? "No CDL penalty remains at this position. Positive-teacher JSD can still apply to a retained sample."
+    : "A contrastive penalty remains. This readout is before sample and token gating.";
 }
-setStage(0);
+cdlInputs.forEach((input) => input.addEventListener("input", updateCDL));
+document.querySelector("#cdl-demo fieldset").disabled = false;
+updateCDL();
+
+const thresholdInput = document.querySelector("#dag-threshold");
+const tokenColumns = [...document.querySelectorAll(".token-column")];
+const sampleOptions = [...document.querySelectorAll('[name="sample-case"]')];
+function updateDAG() {
+  const threshold = Math.round(Number(thresholdInput.value) * 100);
+  const retained = document.querySelector('[name="sample-case"]:checked').value === "retained";
+  let selected = 0;
+  const descriptions = [];
+  tokenColumns.forEach((column) => {
+    const discrepancy = Math.round(Number(column.dataset.discrepancy) * 100);
+    const passes = discrepancy > threshold;
+    selected += Number(passes);
+    column.classList.toggle("is-selected", passes);
+    column.querySelector(".token-state").textContent = passes ? "Pass" : "Skip";
+    column.querySelector(".token-bar").style.height = `${discrepancy / Math.LN2}%`;
+    descriptions.push(`${column.querySelector(".token-word").textContent}: ${(discrepancy / 100).toFixed(2)}, ${passes ? "passes" : "does not pass"}`);
+  });
+  document.querySelector("#dag-threshold-value").textContent = (threshold / 100).toFixed(2);
+  document.querySelector(".threshold-line").style.bottom = `${threshold / Math.LN2}%`;
+  document.querySelector("#dag-count").textContent = `${selected} / ${tokenColumns.length} pass the token gate`;
+  document.querySelector(".token-chart").setAttribute("aria-label",
+    `Illustrative token discrepancies. Simulated threshold ${(threshold / 100).toFixed(2)}, strict greater-than gate. ${descriptions.join("; ")}.`);
+  document.querySelectorAll(".rollout-grid li").forEach((rollout, index) => {
+    const correct = retained && index === 2;
+    rollout.classList.toggle("is-correct", correct);
+    rollout.querySelector("strong").textContent = correct ? "Correct" : "Incorrect";
+  });
+  document.querySelector("#sample-status").textContent = retained ? "Sample retained · b = 1" : "Sample filtered · b = 0";
+  document.querySelector("#sample-effect").textContent = retained
+    ? `JSD remains active; ${selected} of the ${tokenColumns.length} illustrative positions are eligible for CDL, subject to the margin.`
+    : "Both JSD and CDL are disabled for this sample. No positions contribute, regardless of the token gate.";
+}
+thresholdInput.addEventListener("input", updateDAG);
+sampleOptions.forEach((input) => input.addEventListener("change", updateDAG));
+document.querySelectorAll("#dag-demo fieldset").forEach((fieldset) => { fieldset.disabled = false; });
+updateDAG();
 
 const cases = [
   {
@@ -149,10 +108,14 @@ const cases = [
     caption: "Figure 4 · Lock attention comparison",
     source: "Figure 4 · Appendix A.4, p. 15",
     kicker: "Evidence present",
-    title: "The lock is silver. The mailbox is red.",
-    description: "Vision-OPD follows the mailbox's dominant red color. CV-OPD focuses on the lock itself and identifies its metallic silver color.",
-    takeaway: "The relevant object, not the surrounding color, should determine the answer.",
-    caveat: "A qualitative example of attention and response behavior, not a causal proof of grounding.",
+    title: "Lock-color identification",
+    "input-note": "Evidence present: the original mailbox image and both models' attention visualizations. The lock is the relevant object; the surrounding red mailbox is a potential distractor.",
+    question: "What is the color of the lock?",
+    choices: "(A) yellow · (B) silver · (C) golden · (D) red",
+    "response-note": "Vision-OPD: (D) red. CV-OPD: (B) silver. The complete recorded responses and attention maps are reproduced in the figure.",
+    description: "Vision-OPD's red prediction matches the surrounding mailbox, while CV-OPD's silver prediction matches the lock.",
+    takeaway: "The attention maps are consistent with this difference in the referenced visual regions.",
+    caveat: "Attention is supporting evidence, not a sufficient causal proof of grounding.",
     alt: "Figure 4: Vision-OPD predicts the mailbox's dominant red; CV-OPD attends to the lock and predicts silver.",
   },
   {
@@ -161,9 +124,13 @@ const cases = [
     source: "Figure 5 · Appendix A.5, p. 15",
     kicker: "Evidence removed",
     title: "The expected answer survives the mask.",
-    description: "Vision-OPD describes the hidden children and predicts the expected spatial relation. CV-OPD instead notes that the requested children are not visible and describes the remaining person.",
-    takeaway: "Naming the expected answer is not enough when the evidence needed to support it has been removed.",
-    caveat: "CV-OPD still supplies a forced-choice answer. This example illustrates a change in reasoning, not guaranteed abstention or correctness.",
+    "input-note": "Evidence missing: the answer-relevant children are hidden by a black mask. Figure 5 records both models under this condition, not a paired set of original-input responses.",
+    question: "Is the kid with black shirt on the left or right side of the kid with blue shirt?",
+    choices: "(A) right · (B) left",
+    "response-note": "Vision-OPD: (B) left. CV-OPD: (A) right. The figure preserves each model's complete recorded response to the masked input.",
+    description: "Vision-OPD describes children hidden by the mask and gives the expected relation; CV-OPD notes that those children are not visible and describes the remaining person.",
+    takeaway: "Matching the expected answer is not evidence of grounding when its visual support has been removed.",
+    caveat: "CV-OPD still makes a forced choice; this case does not demonstrate guaranteed abstention or correctness.",
     alt: "Figure 5: the target children are black-masked. Vision-OPD answers left; CV-OPD describes visible evidence and answers right.",
   },
   {
@@ -172,9 +139,13 @@ const cases = [
     source: "Figure 6 · Appendix, p. 16",
     kicker: "Color evidence unavailable",
     title: "Uncertainty is visible in the response.",
-    description: "With the umbrella obscured, CV-OPD explicitly says that there is little usable color information. It then selects white under the required multiple-choice format.",
-    takeaway: "Acknowledging missing visual evidence and choosing the correct option are different outcomes.",
-    caveat: "The paper reports that this forced-choice prediction is incorrect. The example is not presented as an accuracy success.",
+    "input-note": "Evidence present and missing: the original and black-mask images are both reproduced in Figure 6. Only the response to the masked input is reported here.",
+    question: "What is the color of the umbrella?",
+    choices: "(A) red · (B) blue · (C) black · (D) white",
+    "response-note": "CV-OPD: (D) white, incorrect according to the figure caption. Figure 6 does not provide a Vision-OPD response or a CV-OPD original-input response for this comparison.",
+    description: "With the umbrella obscured, CV-OPD explicitly acknowledges that little usable color information remains.",
+    takeaway: "Its forced-choice white prediction is nevertheless incorrect, separating recognition of missing evidence from answer accuracy.",
+    caveat: "This example is not evidence of successful abstention or a general accuracy improvement.",
     alt: "Figure 6: original and black-masked umbrella images, with a CV-OPD response acknowledging unreliable color information and an incorrect white prediction.",
   },
   {
@@ -183,9 +154,13 @@ const cases = [
     source: "Figure 7 · Appendix, p. 16",
     kicker: "Texture evidence corrupted",
     title: "The material cannot be reliably identified.",
-    description: "When Gaussian noise hides the glove's texture, CV-OPD recognizes that the visual information is insufficient to distinguish the materials. It still selects leather when forced to choose.",
-    takeaway: "The response should distinguish observed texture from an unsupported guess.",
-    caveat: "The paper reports that this final choice is incorrect, despite the model acknowledging the lack of reliable evidence.",
+    "input-note": "Evidence present and corrupted: Figure 7 pairs the original image with Gaussian noise over the relevant region. The recorded response is for the corrupted input only.",
+    question: "What is the material of the glove?",
+    choices: "(A) rubber · (B) cotton · (C) kevlar · (D) leather",
+    "response-note": "CV-OPD: (D) leather, incorrect according to the figure caption. Figure 7 provides no Vision-OPD or original-input response to complete a two-model, two-condition comparison.",
+    description: "When noise obscures the glove's texture, CV-OPD acknowledges insufficient evidence to identify the material.",
+    takeaway: "It still selects leather under the required answer format, and the paper labels this choice incorrect.",
+    caveat: "Acknowledging uncertainty is not equivalent to making a grounded or correct final choice.",
     alt: "Figure 7: original and Gaussian-noise glove images, with a response admitting unreliable material evidence and an incorrect leather prediction.",
   },
 ];
@@ -204,7 +179,7 @@ wireTabs(caseTabs, (index) => {
   const button = casePanel.querySelector(".case-figure");
   button.dataset.figure = item.image;
   button.dataset.caption = item.caption;
-  ["source", "kicker", "title", "description", "takeaway", "caveat"].forEach((field) => {
+  ["source", "kicker", "title", "input-note", "question", "choices", "response-note", "description", "takeaway", "caveat"].forEach((field) => {
     casePanel.querySelector(`.case-${field}`).textContent = item[field];
   });
 });
@@ -217,7 +192,6 @@ document.querySelectorAll("[data-figure]").forEach((button) => {
     dialog.querySelector(".dialog-caption").textContent = button.dataset.caption;
     dialog.querySelector(".dialog-original").href = button.dataset.figure;
     dialog.showModal();
-    document.body.style.overflow = "hidden";
   });
 });
 dialog.querySelector(".dialog-close").addEventListener("click", () => dialog.close());
@@ -226,4 +200,36 @@ dialog.addEventListener("click", (event) => {
   const bounds = dialog.getBoundingClientRect();
   if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.close();
 });
-dialog.addEventListener("close", () => { document.body.style.overflow = ""; });
+const copyButton = document.querySelector(".copy-citation");
+const copyStatus = document.querySelector(".copy-status");
+copyButton.addEventListener("click", async () => {
+  const citation = document.querySelector("#bibtex").textContent;
+  let copied = false;
+  copyButton.disabled = true;
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(citation);
+      copied = true;
+    }
+  } catch {
+    // Local file previews and restricted browsers may deny Clipboard API access.
+  }
+  if (!copied) {
+    const textarea = document.createElement("textarea");
+    textarea.value = citation;
+    textarea.className = "clipboard-fallback";
+    textarea.setAttribute("aria-label", "BibTeX citation");
+    document.body.append(textarea);
+    textarea.select();
+    try {
+      copied = document.execCommand("copy");
+    } catch {
+      copied = false;
+    } finally {
+      textarea.remove();
+    }
+  }
+  copyButton.disabled = false;
+  copyButton.focus({ preventScroll: true });
+  copyStatus.textContent = copied ? "Copied" : "Copy unavailable. Use the download link.";
+});
