@@ -3,411 +3,243 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="CV-OPD: Contrastive Vision On-Policy Distillation for evidence-grounded multimodal reasoning."
-    />
-    <title>CV-OPD — Contrastive Vision On-Policy Distillation</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap"
-      rel="stylesheet"
-    />
+    <meta name="description" content="CV-OPD: Contrastive Vision On-Policy Distillation. Learning to distinguish answer-relevant visual evidence from irrelevant cues." />
+    <title>CV-OPD | Contrastive Vision On-Policy Distillation</title>
     <link rel="stylesheet" href="styles.css" />
+    <script src="paper_assets/lucide.min.js" defer></script>
+    <script src="script.js" defer></script>
   </head>
-
   <body>
-    <div class="page-shell">
-      <header class="site-header">
-        <a class="brand" href="#top" aria-label="CV-OPD home">
-          <span class="brand-mark">CV</span>
-          <span>CV-OPD</span>
-        </a>
-        <button class="menu-toggle" aria-label="Open navigation" aria-expanded="false">
-          <span></span><span></span><span></span>
-        </button>
-        <nav class="nav-links" aria-label="Primary navigation">
-          <a href="#problem">Motivation</a>
+    <a class="skip-link" href="#main">Skip to content</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <a class="brand" href="#top"><span class="brand-symbol" aria-hidden="true">CV</span>CV-OPD</a>
+        <nav class="nav-links" aria-label="Main navigation">
+          <a href="#motivation">Motivation</a>
           <a href="#method">Method</a>
-          <a href="#story">Story</a>
-          <a href="#resources">Resources</a>
+          <a href="#results">Results</a>
+          <a href="#evidence">Visual evidence</a>
         </nav>
-        <a class="header-cta" href="https://github.com/HaoLin3419/Contrastive-Vision-OPD" target="_blank" rel="noreferrer">GitHub ↗</a>
-      </header>
+        <a class="header-paper" href="CV_OPD_Contrastive_Vision_OPD_ICLR_27.pdf" target="_blank" rel="noopener"><i data-lucide="file-text"></i><span>Paper</span><i data-lucide="arrow-up-right"></i></a>
+        <button class="icon-button menu-toggle" type="button" aria-expanded="false" aria-label="Open navigation" title="Open navigation"><i data-lucide="menu"></i></button>
+      </div>
+    </header>
 
-      <main id="top">
-        <section class="hero section-grid">
-          <div class="hero-copy">
-            <div class="eyebrow"><span class="pulse-dot"></span> ICLR 2027 submission</div>
-            <h1>Teach vision-language models to <em>look</em> before they answer.</h1>
-            <p class="hero-lede">
-              CV-OPD introduces contrastive visual supervision to on-policy distillation, helping
-              multimodal language models distinguish answer-relevant evidence from misleading
-              visual cues.
-            </p>
-            <div class="hero-actions">
-              <a class="button button-primary" href="#method">Explore the method <span>↗</span></a>
-            </div>
-            <div class="hero-meta">
-              <span>Contrastive Vision On-Policy Distillation</span>
-              <span class="meta-divider"></span>
-              <span>student policy</span>
-              <span class="meta-divider"></span>
-              <span>evidence-grounded visual reasoning</span>
-            </div>
+    <main id="main">
+      <section class="masthead container" id="top" aria-labelledby="paper-title">
+        <p class="eyebrow"><span class="status-dot"></span>Research paper <span class="eyebrow-divider">/</span> Under review at ICLR 2027</p>
+        <h1 id="paper-title">CV-OPD<span>Contrastive Vision<br class="desktop-break" /> On-Policy Distillation</span></h1>
+        <p class="abstract-line">A correct answer is not always a grounded answer.<br />Teach the student what visual evidence to rely on, not just what to say.</p>
+        <div class="paper-actions">
+          <a class="button button-primary" href="CV_OPD_Contrastive_Vision_OPD_ICLR_27.pdf" target="_blank" rel="noopener"><i data-lucide="file-text"></i>Read the paper<i data-lucide="arrow-up-right"></i></a>
+          <a class="button" href="https://github.com/HaoLin3419/Contrastive-Vision-OPD" target="_blank" rel="noopener"><i data-lucide="github"></i>Code<i data-lucide="arrow-up-right"></i></a>
+        </div>
+      </section>
+
+      <section class="overview container" aria-labelledby="overview-title">
+        <div class="figure-heading"><h2 id="overview-title">When the evidence disappears, the answer should reflect it.</h2><span>Figure 1</span></div>
+        <button class="figure-button" type="button" data-figure="paper_assets/figure-1-hires.png" data-caption="Figure 1 · Evidence availability and model behavior" aria-label="Enlarge Figure 1">
+          <img src="paper_assets/figure-1-hires.png" width="1640" height="652" alt="Paper Figure 1: with the girl's shirt hidden, Vision-OPD still predicts pink, while CV-OPD acknowledges that the color is not clearly visible. The right panel compares benchmark accuracy and masked-input error." fetchpriority="high" />
+          <span class="expand-icon" aria-hidden="true"><i data-lucide="maximize-2"></i></span>
+        </button>
+        <div class="overview-takeaways">
+          <p><span class="number">01</span><span><strong>The shortcut</strong>Correct predictions can persist without the answer-relevant pixels.</span></p>
+          <p><span class="number">02</span><span><strong>The intervention</strong>Contrast relevant and irrelevant crops under the same student prefix.</span></p>
+          <p><span class="number">03</span><span><strong>The outcome</strong>More evidence-sensitive responses and higher benchmark accuracy.</span></p>
+        </div>
+      </section>
+
+      <section class="section band" id="motivation">
+        <div class="container">
+          <div class="section-heading">
+            <div><p class="eyebrow">01 / Motivation</p><h2>Answer matching leaves<br />a visual shortcut open.</h2></div>
+            <p>Vision-OPD gives a crop-conditioned teacher privileged visual evidence. Matching its output distribution does not, by itself, require the full-image student to find that evidence.</p>
           </div>
-
-          <div class="hero-visual">
-            <figure class="hero-figure-card">
-              <div class="card-kicker">Paper Figure 1 · overview</div>
-              <img class="hero-paper-image" src="paper_assets/cvopd-figure-1-complete.png" alt="Complete CV-OPD Figure 1 showing the Vision-OPD shortcut failure and CV-OPD comparison" />
-              <figcaption>Figure 1. Vision-OPD may answer correctly from corrupted visual input; CV-OPD reduces masked-evidence error while maintaining accuracy.</figcaption>
+          <div class="diagnostic-layout">
+            <figure>
+              <button class="figure-button" type="button" data-figure="paper_assets/figure-2-hires.png" data-caption="Figure 2 · Black-mask and Gaussian-noise diagnostics" aria-label="Enlarge Figure 2">
+                <img src="paper_assets/figure-2-hires.png" width="1592" height="752" alt="Figure 2: accuracy under black-mask and Gaussian-noise corruption, and Vision-OPD attention examples for a lock's color and a woman's pose." loading="lazy" />
+                <span class="expand-icon" aria-hidden="true"><i data-lucide="maximize-2"></i></span>
+              </button>
+              <figcaption>Figure 2 · Corrupted-input evaluation and attention analysis, paper §2.2.</figcaption>
             </figure>
-          </div>
-        </section>
-
-        <section id="problem" class="content-section section-grid">
-          <div class="section-intro">
-            <div class="section-number">01 / Motivation</div>
-            <h2>Correct answers can still be <span>ungrounded.</span></h2>
-            <p>
-              Existing vision-language on-policy distillation gives the teacher privileged access
-              to answer-related image regions. That improves accuracy, but can also teach a shortcut:
-              reproduce the answer without learning to rely on the visual evidence.
-            </p>
-          </div>
-
-          <div class="problem-panel">
-            <div class="panel-label">Diagnostic observation</div>
-            <figure class="paper-reference-card">
-              <img src="paper_assets/cvopd-figure-2-complete.png" alt="Complete CV-OPD Figure 2 showing black-mask and Gaussian-noise diagnostics" />
-              <figcaption>
-                <span>Paper Figure 2</span>
-                <strong>Black masks, Gaussian noise, and attention maps expose the visual shortcut.</strong>
-              </figcaption>
-            </figure>
-            <div class="diagnostic-facts">
-              <div><span>01</span><strong>Black mask</strong><p>Answer-related regions are replaced and accuracy is measured again.</p></div>
-              <div><span>02</span><strong>Gaussian noise</strong><p>The same visual evidence is corrupted with noise to test shortcut reliance.</p></div>
-              <div><span>03</span><strong>Attention map</strong><p>The paper checks whether Vision-OPD actually attends to the relevant region.</p></div>
-            </div>
-            <div class="quote-box">
-              <span class="quote-mark">“</span>
-              <p>Answer accuracy is not enough. A grounded model must change its answer when the evidence changes.</p>
+            <div class="diagnostic-copy">
+              <div><span class="small-label">Intervention</span><h3>Remove the relevant evidence.</h3><p>Replace the answer-related region with a black mask or Gaussian noise.</p></div>
+              <div><span class="small-label">Observation</span><h3>The expected answer can remain.</h3><p>The model may still predict the original answer even though its visual basis is missing.</p></div>
+              <div class="key-insight"><span class="small-label">Implication</span><p><strong>Accuracy alone cannot establish visual grounding.</strong> We also need to test whether predictions depend on the available evidence.</p></div>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section id="method" class="content-section method-section">
-          <div class="section-intro centered-intro">
-            <div class="section-number">02 / Method</div>
-            <h2>Contrast the evidence.<br /><span>Ground the reasoning.</span></h2>
-            <p>
-              CV-OPD keeps the original on-policy trajectory, then adds a negative teacher
-              conditioned on an unrelated crop from the same image.
-            </p>
+      <section class="section" id="method">
+        <div class="container">
+          <div class="section-heading">
+            <div><p class="eyebrow">02 / Method</p><h2>Same prefix.<br />Different visual evidence.</h2></div>
+            <p>CV-OPD adds an unrelated crop-conditioned teacher. The student learns to move toward the positive teacher and away from the negative teacher, at selected token positions.</p>
           </div>
 
-          <div class="pipeline-demo" data-step="0">
-            <div class="pipeline-demo-top">
-              <div>
-              <div class="diagram-eyebrow"><span class="diagram-live-dot"></span> Paper Figure 3 · method walkthrough</div>
-                <h3>Roll out. Contrast visual evidence. Update the student.</h3>
-              </div>
-              <div class="diagram-controls" aria-label="Pipeline animation controls">
-                <button class="diagram-control diagram-play" type="button" aria-label="Pause animation" title="Pause animation">Ⅱ</button>
-                <button class="diagram-control diagram-restart" type="button" aria-label="Restart animation">↺</button>
+          <div class="method-player" data-step="0">
+            <div class="player-top">
+              <div><span class="small-label">Figure 3 / Training pipeline</span><h3>What is the color of the little girl's shirt?</h3></div>
+              <div class="player-controls">
+                <button class="icon-button play-button" type="button" aria-label="Pause animation" title="Pause animation"><i data-lucide="pause"></i></button>
+                <button class="icon-button restart-button" type="button" aria-label="Restart animation" title="Restart animation"><i data-lucide="rotate-ccw"></i></button>
               </div>
             </div>
-            <figure class="pipeline-paper-reference">
-              <img src="paper_assets/cvopd-figure-3-pipeline-complete.png" alt="Complete CV-OPD Figure 3 pipeline from the paper" />
-              <figcaption>
-                <span>Paper Figure 3</span>
-                <strong>Student rollouts, positive and negative teachers, shared prefixes, and contrastive supervision.</strong>
-              </figcaption>
-            </figure>
-            <div class="diagram-scroll" hidden aria-hidden="true">
-              <svg class="pipeline-diagram" viewBox="0 0 1200 710" role="img" aria-labelledby="diagram-title diagram-desc">
-                <title id="diagram-title">CV-OPD contrastive on-policy distillation pipeline</title>
-                <desc id="diagram-desc">A student samples answers from a full image. Positive and negative crop-conditioned teachers evaluate the same student prefixes. Contrastive divergence and discrepancy-aware gates select supervision to update the student.</desc>
-                <defs>
-                  <linearGradient id="imgSky" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="0" stop-color="#b9ebe2" />
-                    <stop offset="0.62" stop-color="#e7f0d6" />
-                    <stop offset="0.63" stop-color="#edc38e" />
-                    <stop offset="1" stop-color="#dfa875" />
-                  </linearGradient>
-                  <linearGradient id="tealCard" x1="0" x2="1">
-                    <stop stop-color="#e6f8f3" />
-                    <stop offset="1" stop-color="#f4fbf8" />
-                  </linearGradient>
-                  <linearGradient id="coralCard" x1="0" x2="1">
-                    <stop stop-color="#fff0e9" />
-                    <stop offset="1" stop-color="#fff8f4" />
-                  </linearGradient>
-                  <filter id="cardShadow" x="-20%" y="-20%" width="140%" height="150%">
-                    <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#193047" flood-opacity=".09" />
-                  </filter>
-                  <marker id="arrowInk" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-                    <path d="M0 0L10 5L0 10Z" fill="#93a4a8" />
-                  </marker>
-                  <marker id="arrowTeal" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-                    <path d="M0 0L10 5L0 10Z" fill="#00a98f" />
-                  </marker>
-                  <marker id="arrowCoral" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-                    <path d="M0 0L10 5L0 10Z" fill="#f07661" />
-                  </marker>
-                  <pattern id="noisePattern" width="16" height="16" patternUnits="userSpaceOnUse">
-                    <rect width="16" height="16" fill="#f5e9df" />
-                    <path d="M0 0h7v7H0zM9 1h6v5H9zM3 10h5v6H3zM10 9h6v7h-6z" fill="#e39b79" opacity=".58" />
-                    <path d="M7 0h2v16H7zM0 7h16v2H0z" fill="#8d9fc0" opacity=".46" />
-                  </pattern>
-                </defs>
-
-                <rect class="diagram-bg" x="1" y="1" width="1198" height="708" rx="24" />
-                <path class="diagram-grid" d="M0 118H1200M0 350H1200M0 582H1200" />
-
-                <g class="diagram-stage stage-rollout" data-stage="0">
-                  <text x="34" y="43" class="svg-kicker">01 · ON-POLICY ROLLOUT</text>
-                  <text x="34" y="67" class="svg-caption">The student samples its own trajectories from the original image.</text>
-                  <rect class="svg-card input-card" x="34" y="91" width="224" height="242" rx="18" filter="url(#cardShadow)" />
-                  <text x="53" y="119" class="svg-card-kicker">FULL IMAGE + QUESTION</text>
-                  <image href="paper_assets/cvopd-figure-2-complete.png" x="52" y="133" width="188" height="118" preserveAspectRatio="xMidYMid meet" />
-                  <rect x="162" y="185" width="54" height="55" rx="5" class="positive-crop-box" />
-                  <rect x="73" y="143" width="55" height="50" rx="5" class="negative-crop-box" />
-                  <text x="52" y="272" class="svg-small">Q: What is the person wearing?</text>
-                  <rect x="52" y="286" width="188" height="28" rx="8" fill="#f0f4f3" />
-                  <text x="65" y="305" class="svg-answer">Student prefix: “The person is…”</text>
-
-                  <path class="flow-line flow-neutral" d="M258 210H299" marker-end="url(#arrowInk)" />
-                  <rect class="rollout-pill" x="302" y="174" width="145" height="72" rx="15" />
-                  <text x="374" y="199" text-anchor="middle" class="svg-card-kicker">FROZEN ROLLOUT</text>
-                  <text x="374" y="222" text-anchor="middle" class="svg-body">M answer paths</text>
-                  <path class="flow-line flow-neutral" d="M447 210H474V137H498" marker-end="url(#arrowInk)" />
-                  <path class="flow-line flow-neutral" d="M474 210V283H498" marker-end="url(#arrowInk)" />
-                  <circle class="flow-particle particle-neutral" r="5"><animateMotion dur="2.2s" repeatCount="indefinite" path="M258 210H299" /></circle>
-                  <circle class="flow-particle particle-neutral" r="5"><animateMotion dur="2.7s" repeatCount="indefinite" path="M447 210H474V137H498" /></circle>
-
-                  <rect class="svg-card student-card" x="498" y="99" width="206" height="92" rx="16" filter="url(#cardShadow)" />
-                  <circle cx="532" cy="132" r="17" fill="#111b2d" />
-                  <path d="M524 133h16m-8-8v16" stroke="#a4eee0" stroke-width="2" />
-                  <text x="559" y="128" class="svg-card-kicker">STUDENT POLICY</text>
-                  <text x="559" y="151" class="svg-body">student policy</text>
-                  <text x="518" y="174" class="svg-small">Full image · on-policy prefixes</text>
-                  <rect class="svg-card rollout-card" x="498" y="238" width="206" height="90" rx="16" />
-                  <text x="518" y="265" class="svg-card-kicker">SAMPLED RESPONSE</text>
-                  <text x="518" y="291" class="svg-body">Student prefix held fixed</text>
-                  <text x="518" y="312" class="svg-small">Same prefix sent to both teachers</text>
-
-                  <path class="flow-line flow-neutral" d="M704 145H731V210H761" marker-end="url(#arrowInk)" />
-                  <path class="flow-line flow-neutral" d="M704 283H731V210" />
-                  <rect class="ema-card" x="764" y="164" width="163" height="93" rx="17" />
-                  <text x="845" y="191" text-anchor="middle" class="svg-card-kicker">SHARED EMA</text>
-                  <text x="845" y="216" text-anchor="middle" class="svg-body">Teacher weights</text>
-                  <text x="845" y="238" text-anchor="middle" class="svg-small">same prefix · two views</text>
-                  <path class="flow-line flow-neutral" d="M927 210H950V137H974" marker-end="url(#arrowInk)" />
-                  <path class="flow-line flow-neutral" d="M950 210V283H974" marker-end="url(#arrowInk)" />
-                  <circle class="flow-particle particle-neutral" r="5"><animateMotion dur="2.5s" repeatCount="indefinite" path="M927 210H950V137H974" /></circle>
-
-                  <rect class="crop-card crop-positive-card" x="976" y="101" width="188" height="87" rx="15" />
-                  <image href="paper_assets/cvopd-figure-2-complete.png" x="991" y="117" width="51" height="51" preserveAspectRatio="xMidYMid meet" />
-                  <text x="1053" y="131" class="svg-card-kicker">POSITIVE CROP</text>
-                  <text x="1053" y="153" class="svg-body">Answer-related</text>
-                  <text x="1053" y="171" class="svg-small">high evidence</text>
-                  <rect class="crop-card crop-negative-card" x="976" y="239" width="188" height="87" rx="15" />
-                   <image href="paper_assets/cvopd-figure-2-complete.png" x="991" y="255" width="51" height="51" preserveAspectRatio="xMidYMid meet" />
-                  <text x="1053" y="269" class="svg-card-kicker">NEGATIVE CROP</text>
-                  <text x="1053" y="291" class="svg-body">Random region</text>
-                  <text x="1053" y="309" class="svg-small">low overlap · irrelevant</text>
-                  <text x="34" y="373" class="svg-note">The two teacher branches share model weights and student prefixes; only the visual crop changes.</text>
-                </g>
-
-                <g class="diagram-stage stage-contrast" data-stage="1">
-                  <text x="34" y="416" class="svg-kicker">02 · CONTRASTIVE SUPERVISION</text>
-                  <text x="34" y="440" class="svg-caption">Let the useful visual cue light up. Let the unrelated cue fade.</text>
-                  <rect class="dist-card positive-dist" x="34" y="468" width="325" height="190" rx="18" filter="url(#cardShadow)" />
-                  <text x="57" y="497" class="svg-card-kicker">ILLUSTRATIVE TOKEN DISTRIBUTION  π⁺</text>
-                  <text x="57" y="526" class="svg-body">“red”</text><text x="334" y="526" text-anchor="end" class="svg-value">strong signal</text>
-                  <rect x="57" y="537" width="277" height="9" rx="5" fill="#e8edeb" /><rect class="bar-positive" x="57" y="537" width="216" height="9" rx="5" />
-                  <text x="57" y="573" class="svg-body">“blue”</text><text x="334" y="573" text-anchor="end" class="svg-value">weak signal</text>
-                  <rect x="57" y="584" width="277" height="9" rx="5" fill="#e8edeb" /><rect x="57" y="584" width="22" height="9" rx="5" fill="#9fcec3" />
-                  <text x="57" y="626" class="svg-small">The useful clue brightens the matching word.</text>
-
-                  <rect class="dist-card negative-dist" x="34" y="468" width="325" height="190" rx="18" filter="url(#cardShadow)" />
-                  <text x="57" y="497" class="svg-card-kicker">ILLUSTRATIVE TOKEN DISTRIBUTION  π⁻</text>
-                  <text x="57" y="526" class="svg-body">“red”</text><text x="334" y="526" text-anchor="end" class="svg-value">weak signal</text>
-                  <rect x="57" y="537" width="277" height="9" rx="5" fill="#f0e9e5" /><rect class="bar-negative" x="57" y="537" width="36" height="9" rx="5" />
-                  <text x="57" y="573" class="svg-body">“blue”</text><text x="334" y="573" text-anchor="end" class="svg-value">strong signal</text>
-                  <rect x="57" y="584" width="277" height="9" rx="5" fill="#f0e9e5" /><rect x="57" y="584" width="169" height="9" rx="5" fill="#f0aa90" />
-                  <text x="57" y="626" class="svg-small">The unrelated view cannot explain the answer.</text>
-
-                  <path class="flow-line flow-positive" d="M359 530H397" marker-end="url(#arrowTeal)" />
-                  <path class="flow-line flow-negative" d="M359 603H397" marker-end="url(#arrowCoral)" />
-                  <rect class="loss-card" x="402" y="489" width="249" height="143" rx="19" filter="url(#cardShadow)" />
-                  <text x="526" y="516" text-anchor="middle" class="svg-card-kicker">CONTRASTIVE SIGNAL</text>
-                  <text x="526" y="552" text-anchor="middle" class="svg-action-word">PULL</text>
-                  <text x="526" y="580" text-anchor="middle" class="svg-body">toward useful evidence</text>
-                  <text x="526" y="603" text-anchor="middle" class="svg-body coral-text">away from misleading cues</text>
-
-                  <path class="flow-line flow-teal" d="M651 560H696" marker-end="url(#arrowTeal)" />
-                  <rect class="gate-card" x="701" y="475" width="216" height="170" rx="19" filter="url(#cardShadow)" />
-                  <text x="809" y="502" text-anchor="middle" class="svg-card-kicker">DAG · TWO-LEVEL GATE</text>
-                  <rect x="721" y="520" width="176" height="43" rx="10" fill="#eef4ff" />
-                  <text x="809" y="538" text-anchor="middle" class="svg-small">NOTICE THE DIFFERENCE</text>
-                  <text x="809" y="554" text-anchor="middle" class="svg-body">keep words that react to vision</text>
-                  <rect x="721" y="575" width="176" height="48" rx="10" fill="#fff0e9" />
-                  <text x="809" y="594" text-anchor="middle" class="svg-small">CHECK THE WHOLE ANSWER</text>
-                  <text x="809" y="611" text-anchor="middle" class="svg-body">learn from a promising attempt</text>
-                  <path class="flow-line flow-teal" d="M917 560H958" marker-end="url(#arrowTeal)" />
-                  <rect class="objective-card" x="965" y="489" width="199" height="143" rx="19" filter="url(#cardShadow)" />
-                  <text x="1064" y="516" text-anchor="middle" class="svg-card-kicker">WHAT GETS UPDATED</text>
-                  <text x="1064" y="552" text-anchor="middle" class="svg-action-word teal-word">LOOK HERE</text>
-                  <text x="1064" y="580" text-anchor="middle" class="svg-body">tokens that react to</text>
-                  <text x="1064" y="602" text-anchor="middle" class="svg-body">the visual evidence</text>
-                  <circle class="flow-particle particle-positive" r="5"><animateMotion dur="2.1s" repeatCount="indefinite" path="M359 530H397" /></circle>
-                  <circle class="flow-particle particle-negative" r="5"><animateMotion dur="2.4s" repeatCount="indefinite" path="M359 603H397" /></circle>
-                  <circle class="flow-particle particle-teal" r="5"><animateMotion dur="2.8s" repeatCount="indefinite" path="M917 560H958" /></circle>
-                  <text x="34" y="687" class="svg-note">CDL stops pushing once the margin is satisfied; DAG focuses it on reliable, visually informative positions.</text>
-                </g>
-
-                <g class="diagram-stage stage-update" data-stage="2">
-                  <text x="34" y="416" class="svg-kicker">03 · POLICY UPDATE</text>
-                  <text x="34" y="440" class="svg-caption">The gated contrastive signal improves the student’s use of visual evidence.</text>
-                  <rect class="update-side-card" x="72" y="487" width="255" height="131" rx="20" />
-                  <text x="199" y="520" text-anchor="middle" class="svg-card-kicker">VISUAL EVIDENCE</text>
-                  <text x="199" y="557" text-anchor="middle" class="svg-action-word">same prefix</text>
-                  <text x="199" y="580" text-anchor="middle" class="svg-body">different visual evidence</text>
-                  <text x="199" y="586" text-anchor="middle" class="svg-small">the same prefix, different views</text>
-                  <path class="flow-line flow-teal" d="M327 553H414" marker-end="url(#arrowTeal)" />
-                  <rect class="update-loss-card" x="419" y="487" width="285" height="131" rx="20" />
-                  <text x="561" y="520" text-anchor="middle" class="svg-card-kicker">GATED TRAINING SIGNAL</text>
-                  <text x="561" y="552" text-anchor="middle" class="svg-action-word teal-word">COMPARE</text>
-                  <text x="561" y="580" text-anchor="middle" class="svg-body">keep reliable visual reactions</text>
-                  <text x="561" y="601" text-anchor="middle" class="svg-small">and let irrelevant reactions fade</text>
-                  <path class="flow-line flow-teal" d="M704 553H785" marker-end="url(#arrowTeal)" />
-                  <rect class="updated-student-card" x="791" y="473" width="332" height="159" rx="23" filter="url(#cardShadow)" />
-                  <circle cx="839" cy="522" r="22" fill="#111b2d" />
-                  <path d="M829 522h20m-10-10v20" stroke="#a4eee0" stroke-width="2.5" />
-                  <text x="875" y="515" class="svg-card-kicker">UPDATED STUDENT</text>
-                  <text x="875" y="541" class="svg-body">Evidence-grounded policy</text>
-                  <rect x="815" y="566" width="284" height="43" rx="11" fill="#e8f8f3" />
-                  <text x="957" y="593" text-anchor="middle" class="svg-answer">See it · use it · answer from it</text>
-                  <path class="feedback-loop" d="M957 632V666H199V623" marker-end="url(#arrowTeal)" />
-                  <text x="578" y="661" text-anchor="middle" class="svg-small">on-policy iteration · EMA teacher tracks the updated student</text>
-                  <circle class="flow-particle particle-teal" r="6"><animateMotion dur="3.4s" repeatCount="indefinite" path="M327 553H414" /></circle>
-                  <circle class="flow-particle particle-teal" r="6"><animateMotion dur="3.4s" repeatCount="indefinite" path="M704 553H785" /></circle>
-                </g>
-              </svg>
+            <div class="step-tabs" role="tablist" aria-label="Training stages">
+              <button type="button" id="step-0" role="tab" aria-selected="true" aria-controls="stage-detail" data-step="0"><span>01</span>Roll out</button>
+              <button type="button" id="step-1" role="tab" aria-selected="false" aria-controls="stage-detail" tabindex="-1" data-step="1"><span>02</span>Contrast views</button>
+              <button type="button" id="step-2" role="tab" aria-selected="false" aria-controls="stage-detail" tabindex="-1" data-step="2"><span>03</span>Select tokens</button>
+              <button type="button" id="step-3" role="tab" aria-selected="false" aria-controls="stage-detail" tabindex="-1" data-step="3"><span>04</span>Apply CDL</button>
+              <button type="button" id="step-4" role="tab" aria-selected="false" aria-controls="stage-detail" tabindex="-1" data-step="4"><span>05</span>Update</button>
             </div>
-            <div class="diagram-bottom">
-              <div class="step-explainer" aria-live="polite">
-                <span class="step-count">STEP 1 / 3</span>
-                <div>
-                  <strong class="step-title">Sample on-policy trajectories</strong>
-                  <p class="step-description">The student sees the full image and generates answer prefixes. Both teacher branches reuse those exact prefixes.</p>
+
+            <div class="pipeline-scroll" tabindex="0" role="region" aria-label="Figure 3 training diagram">
+              <div class="pipeline">
+                <div class="column-head head-vision">Visual input</div>
+                <div class="column-head head-model">Policy</div>
+                <div class="column-head head-tokens">Token distributions</div>
+                <div class="column-head head-objective">Supervision</div>
+
+                <div class="visual-input student-input stage-rollout">
+                  <img src="paper_assets/method-full.png" width="166" height="122" alt="Original full image from Figure 3, containing the little girl." />
+                  <span><b>V</b> Full image</span>
                 </div>
-              </div>
-              <div class="step-dots" role="tablist" aria-label="Choose pipeline step">
-                <button class="step-dot is-active" type="button" role="tab" aria-selected="true" aria-label="Step 1: rollout" data-go-step="0"></button>
-                <button class="step-dot" type="button" role="tab" aria-selected="false" aria-label="Step 2: contrast and gate" data-go-step="1"></button>
-                <button class="step-dot" type="button" role="tab" aria-selected="false" aria-label="Step 3: update student" data-go-step="2"></button>
-              </div>
-              <div class="step-label">AUTO PLAY <span class="auto-indicator"></span></div>
-            </div>
-          </div>
-          <p class="diagram-mobile-hint">Use the controls to follow the three training stages.</p>
+                <div class="policy student-policy stage-rollout stage-update">
+                  <span class="policy-kind"><i data-lucide="cpu"></i>Student</span><strong>π<sub>θ</sub></strong><small>Qwen3.5-4B</small>
+                </div>
+                <div class="token-row student-tokens stage-rollout">
+                  <span class="distribution-label">Student rollout <b>π</b></span>
+                  <div class="tokens"><span>It's</span><span>a</span><span class="token-error">black</span><span>shirt</span><span class="token-eos">EOS</span></div>
+                  <small>Illustrative error token from Figure 3</small>
+                </div>
 
-          <div class="method-cards story-cards">
-            <article class="method-card story-card story-card-guess" data-story-step="0">
-              <div class="method-card-top"><span class="method-tag">01 · ON-POLICY ROLLOUT</span><span class="method-symbol">↗</span></div>
-              <h3>Sample and retain student rollouts.</h3>
-              <p>Generate on-policy responses and retain a sample when at least one rollout is correct.</p>
-            </article>
-            <article class="method-card story-card story-card-compare" data-story-step="1">
-              <div class="method-card-top"><span class="method-tag">02 · TEACHER CONTRAST</span><span class="method-symbol">↔</span></div>
-              <h3>Hold the prefix fixed; vary the crop.</h3>
-              <p>The teacher branches share parameters and the student prefix, differing only in the privileged visual region.</p>
-            </article>
-            <article class="method-card story-card story-card-learn" data-story-step="2">
-              <div class="method-card-top"><span class="method-tag">03 · DAG + CDL</span><span class="method-symbol">✦</span></div>
-              <h3>Gate the contrastive learning signal.</h3>
-              <p>Token- and sample-level discrepancies select supervision for the contrastive objective alongside positive-teacher JSD.</p>
-            </article>
-          </div>
-        </section>
+                <div class="visual-input positive-input stage-teachers">
+                  <img src="paper_assets/method-positive.png" width="104" height="106" alt="Figure 3 positive crop containing the girl's pink shirt." />
+                  <span><b>R<sup>+</sup></b> Relevant crop</span>
+                </div>
+                <div class="policy positive-policy stage-teachers">
+                  <span class="policy-kind"><i data-lucide="cpu"></i>Positive teacher</span><strong>τ<sup>+</sup></strong><small>Shared parameters ϕ</small>
+                </div>
+                <div class="token-row positive-tokens stage-teachers stage-gate">
+                  <span class="distribution-label">Positive distribution <b>τ<sup>+</sup></b></span>
+                  <div class="tokens"><span>The</span><span>a</span><span class="token-positive">pink</span><span>shirt</span><span class="token-eos">EOS</span></div>
+                  <small>Correction supported by the shirt crop</small>
+                </div>
 
-        <section id="story" class="content-section paper-cases-section">
-          <div class="section-intro centered-intro">
-            <div class="section-number">03 / Paper cases</div>
-            <h2>Examples from the <span>paper.</span></h2>
-            <p>Each panel below is the complete figure artwork from the cited page, paired with a summary of that figure’s actual finding.</p>
-          </div>
-          <div class="paper-cases-grid">
-            <figure class="paper-case-card">
-              <img src="paper_assets/cvopd-figure-4-complete.png" alt="Complete Figure 4 showing Vision-OPD and CV-OPD attention and answers for the lock question" />
-              <figcaption><span>Figure 4 · Lock attention comparison</span><strong>Vision-OPD follows the mailbox’s dominant red; CV-OPD focuses on the lock and identifies it as silver.</strong></figcaption>
-            </figure>
-            <figure class="paper-case-card">
-              <img src="paper_assets/cvopd-figure-5-complete.png" alt="Complete Figure 5 showing model responses when the answer-related region is black-masked" />
-              <figcaption><span>Figure 5 · Black-mask case</span><strong>With the relevant region hidden, Vision-OPD gives the expected answer while CV-OPD describes the visible evidence and its ambiguity.</strong></figcaption>
-            </figure>
-            <figure class="paper-case-card">
-              <img src="paper_assets/cvopd-figure-6-complete.png" alt="Complete Figure 6 showing CV-OPD’s response to an umbrella image with the relevant region black-masked" />
-              <figcaption><span>Figure 6 · Umbrella under black mask</span><strong>CV-OPD notes the color evidence is unreliable; its required multiple-choice prediction is still incorrect.</strong></figcaption>
-            </figure>
-            <figure class="paper-case-card">
-              <img src="paper_assets/cvopd-figure-7-complete.png" alt="Complete Figure 7 showing CV-OPD’s response to a glove image corrupted by Gaussian noise" />
-              <figcaption><span>Figure 7 · Glove under Gaussian noise</span><strong>CV-OPD says the material cannot be identified reliably, although its forced-choice prediction is incorrect.</strong></figcaption>
-            </figure>
-          </div>
-        </section>
+                <div class="visual-input negative-input stage-teachers">
+                  <img src="paper_assets/method-negative.png" width="50" height="34" alt="Figure 3 negative crop of the ground, unrelated to the shirt color." />
+                  <span><b>R<sup>−</sup></b> Unrelated crop</span>
+                </div>
+                <div class="policy negative-policy stage-teachers">
+                  <span class="policy-kind"><i data-lucide="cpu"></i>Negative teacher</span><strong>τ<sup>−</sup></strong><small>Shared parameters ϕ</small>
+                </div>
+                <div class="token-row negative-tokens stage-teachers">
+                  <span class="distribution-label">Negative distribution <b>τ<sup>−</sup></b></span>
+                  <div class="tokens"><span>The</span><span>a</span><span class="token-negative">ceramic</span><span class="token-negative">ground</span><span class="token-eos">EOS</span></div>
+                  <small>Unrelated content from the ground crop</small>
+                </div>
 
-        <section class="content-section principles-section">
-          <div class="section-intro centered-intro">
-            <div class="section-number">04 / Design principles</div>
-            <h2>Three small ideas.<br /><span>One clearer behavior.</span></h2>
-            <p>CV-OPD turns visual grounding into something the training process can explicitly compare, select, and reinforce.</p>
-          </div>
-          <div class="principles-grid">
-            <div class="principle-card"><span class="principle-icon">◉</span><strong>Same prefix</strong><p>Both teachers judge the same student trajectory.</p></div>
-            <div class="principle-card"><span class="principle-icon">↔</span><strong>Different evidence</strong><p>Only the visual crop changes between the two views.</p></div>
-            <div class="principle-card"><span class="principle-icon">✦</span><strong>Selective learning</strong><p>Useful visual reactions receive the strongest signal.</p></div>
-          </div>
-        </section>
-
-        <section id="resources" class="content-section resources-section">
-          <div class="resource-panel">
-            <div class="resource-copy">
-              <div class="section-number">05 / Resources</div>
-              <h2>Build models that answer from evidence.</h2>
-              <p>
-                Explore the implementation and the evidence-grounded training idea behind CV-OPD.
-              </p>
-              <div class="resource-actions">
-                <a class="button button-outline-light" href="https://github.com/HaoLin3419/Contrastive-Vision-OPD" target="_blank" rel="noreferrer">Open GitHub <span>↗</span></a>
+                <div class="shared-prefix stage-teachers"><i data-lucide="git-branch"></i><span>Both teachers reuse <strong>C<sub>i,t</sub> = (Q, A<sub>&lt;t</sub>)</strong><small>Same student prefix · only the crop changes</small></span></div>
+                <div class="objectives">
+                  <div class="objective jsd-objective stage-rollout stage-update"><span class="objective-name"><b>JSD</b>Positive alignment</span><p>D<sub>JS</sub>(π, τ<sup>+</sup>)</p><small>Retained samples receive distillation.</small></div>
+                  <div class="objective gate-objective stage-gate"><span class="objective-name"><b>DAG</b>Token selection</span><p>d<sub>i,t</sub> &gt; d̄<sub>B</sub></p><small>d = D<sub>JS</sub>(student, positive teacher)</small><div class="gate-positions" aria-label="Illustrative selected token positions"><span></span><span></span><span class="selected"></span><span></span><span></span></div></div>
+                  <div class="objective cdl-objective stage-contrast"><span class="objective-name"><b>CDL</b>Margin constraint</span><p>[μ + d<sup>+</sup> − d<sup>−</sup>]<sub>+</sub></p><div class="distribution-motion" role="img" aria-label="Schematic: the student distribution moves closer to the positive teacher and farther from the negative teacher, until the margin is met."><span class="dist-positive">τ<sup>+</sup></span><span class="dist-student">π</span><span class="dist-negative">τ<sup>−</sup></span></div><div class="pull-push"><span>← toward τ<sup>+</sup></span><span>away from τ<sup>−</sup> →</span></div></div>
+                </div>
+                <div class="sample-gate stage-rollout stage-gate"><i data-lucide="filter"></i><span><strong>Sample gate</strong> Retain the example if at least one of its rollouts is correct.</span></div>
+                <div class="ema-loop stage-update"><i data-lucide="refresh-cw"></i><span><strong>Update student θ</strong><span class="ema-arrow">→</span>EMA teacher update <b>ϕ ← (1 − η)ϕ + ηθ</b></span></div>
               </div>
             </div>
-            <div class="resource-visual">
-              <div class="resource-grid"></div>
-              <div class="resource-badge">
-                <span class="badge-top">CV-OPD</span>
-                <span class="badge-bottom">evidence × policy</span>
-              </div>
-              <div class="github-float">
-                <span class="github-mark">⌘</span>
-                <span><small>official implementation</small><strong>github.com/HaoLin3419</strong></span>
-              </div>
+
+            <div class="stage-detail" id="stage-detail" role="tabpanel" aria-labelledby="step-0">
+              <span class="stage-index">01 / 05</span>
+              <div><h3 class="stage-title">The student starts with the full image.</h3><p class="stage-description">It samples its own responses. Keep a training example when at least one rollout is correct; incorrect rollouts of that retained example are still available for correction.</p></div>
+              <span class="stage-reference">Eq. 6, 13</span>
+            </div>
+            <div class="playback-track" aria-hidden="true"><span></span></div>
+          </div>
+
+          <div class="method-notes">
+            <p><strong>Controlled comparison.</strong> R<sup>−</sup> comes from the same image, matches R<sup>+</sup> in size, and satisfies IoU(R<sup>+</sup>, R<sup>−</sup>) ≤ δ. One negative crop is shared across a sample's rollouts.</p>
+            <p><strong>Distribution-level supervision.</strong> The words above are the paper's illustrative token outputs, not three independently generated answers. Both teacher distributions are evaluated on the student's prefix.</p>
+          </div>
+          <details class="paper-details">
+            <summary><span><i data-lucide="scan-line"></i>Original Figure 3</span><i data-lucide="chevron-down"></i></summary>
+            <figure><button class="figure-button" type="button" data-figure="paper_assets/figure-3-hires.png" data-caption="Figure 3 · Original CV-OPD pipeline, paper page 5" aria-label="Enlarge original Figure 3"><img src="paper_assets/figure-3-hires.png" width="1592" height="828" alt="Original Figure 3 showing visual inputs, student and shared teachers, rollout token examples, JSD, discrepancy-aware gating, contrastive divergence and EMA." loading="lazy" /></button><figcaption>Figure 3, p. 5 · Method definitions: §3.1–3.4. Training procedure: Algorithm 1, p. 14.</figcaption></figure>
+          </details>
+
+          <div class="objective-summary">
+            <div><p class="eyebrow">The training objective</p><h3>Align. Select. Contrast.</h3></div>
+            <div class="loss-equation"><span class="math">L = L<sub>OPD</sub> + λL<sub>CDL</sub><sup>gated</sup></span><p>JSD aligns with the positive teacher. DAG selects positions for CDL. The contrastive loss becomes zero once d<sup>−</sup> − d<sup>+</sup> ≥ μ.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section band" id="results">
+        <div class="container">
+          <div class="section-heading">
+            <div><p class="eyebrow">03 / Results</p><h2>Better grounding.<br />Measurable gains.</h2></div>
+            <p>Paper-reported evaluation on six fine-grained visual benchmarks. The comparison below uses the same Qwen3.5-4B backbone and the paper's non-thinking evaluation setting.</p>
+          </div>
+          <div class="result-metrics">
+            <div><strong>78.22<span>%</span></strong><p>Average accuracy across six benchmarks</p><small>CV-OPD · Table 1</small></div>
+            <div><strong>+2.30<span> pp</span></strong><p>Average gain over Vision-OPD</p><small>78.22 − 75.92 · Table 1</small></div>
+            <div><strong>+2.60<span> pp</span></strong><p>Gain on ZoomBench</p><small>62.01 − 59.41 · Table 1</small></div>
+          </div>
+          <div class="table-scroll" role="region" tabindex="0" aria-label="Benchmark results">
+            <table>
+              <caption>Table 1 · Selected Qwen3.5-4B baselines · Accuracy (%)</caption>
+              <thead><tr><th scope="col">Method</th><th scope="col">V*</th><th scope="col">Zoom</th><th scope="col">HR 4K</th><th scope="col">HR 8K</th><th scope="col">MME EN</th><th scope="col">MME CN</th><th scope="col">Avg6</th></tr></thead>
+              <tbody>
+                <tr><th scope="row">Base model</th><td>82.20</td><td>48.40</td><td>86.38</td><td>82.00</td><td>63.94</td><td>63.80</td><td>71.12</td></tr>
+                <tr><th scope="row">Vision-OPD</th><td>89.53</td><td>59.41</td><td>81.75</td><td>80.12</td><td>74.51</td><td>70.17</td><td>75.92</td></tr>
+                <tr><th scope="row">VAD</th><td>91.62</td><td>60.12</td><td>85.13</td><td>83.38</td><td>76.98</td><td>71.44</td><td>78.11</td></tr>
+                <tr class="ours"><th scope="row">CV-OPD <span>Ours</span></th><td>91.62</td><td>62.01</td><td>84.38</td><td>83.38</td><td>76.99</td><td>70.93</td><td><strong>78.22</strong></td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p class="table-note">Avg6 is the unweighted mean. CV-OPD improves on Vision-OPD across all six benchmarks; it does not outperform every comparator on every individual benchmark. On HR-Bench 4K, the base model remains higher.</p>
+          <div class="ablation">
+            <div><span class="small-label">Table 2 / Component ablation</span><h3>Both components contribute.</h3><p>Removing either the contrastive objective or the gate reduces average accuracy.</p></div>
+            <div class="ablation-bars" aria-label="Average accuracy: neither component 75.92, DAG only 76.81, CDL only 76.88, full CV-OPD 78.22">
+              <div><span>Neither</span><div class="bar-track"><span style="--value:75.92%"></span></div><b>75.92</b></div>
+              <div><span>DAG only</span><div class="bar-track"><span style="--value:76.81%"></span></div><b>76.81</b></div>
+              <div><span>CDL only</span><div class="bar-track"><span style="--value:76.88%"></span></div><b>76.88</b></div>
+              <div class="full"><span>CDL + DAG</span><div class="bar-track"><span style="--value:78.22%"></span></div><b>78.22</b></div>
+              <div class="bar-axis"><span>Avg6 (%)</span><span>0</span><span>100</span></div>
             </div>
           </div>
-        </section>
-      </main>
+        </div>
+      </section>
 
-      <footer class="site-footer">
-        <span>CV-OPD · Contrastive Vision On-Policy Distillation</span>
-        <span>Built for evidence-grounded multimodal reasoning</span>
-      </footer>
-    </div>
-    <script src="script.js"></script>
+      <section class="section" id="evidence">
+        <div class="container">
+          <div class="section-heading">
+            <div><p class="eyebrow">04 / Visual evidence</p><h2>Look at the object.<br />Respect what is missing.</h2></div>
+            <p>Attention and response examples make the distinction concrete: identifying a lock's color is different from recognizing when the relevant pixels are unavailable.</p>
+          </div>
+          <div class="case-tabs" role="tablist" aria-label="Paper evidence examples">
+            <button type="button" role="tab" id="case-tab-0" aria-selected="true" aria-controls="case-panel" data-case="0">Lock color <span>Fig. 4</span></button>
+            <button type="button" role="tab" id="case-tab-1" aria-selected="false" aria-controls="case-panel" tabindex="-1" data-case="1">Masked evidence <span>Fig. 5</span></button>
+            <button type="button" role="tab" id="case-tab-2" aria-selected="false" aria-controls="case-panel" tabindex="-1" data-case="2">Umbrella <span>Fig. 6</span></button>
+            <button type="button" role="tab" id="case-tab-3" aria-selected="false" aria-controls="case-panel" tabindex="-1" data-case="3">Glove <span>Fig. 7</span></button>
+          </div>
+          <div class="case-panel" id="case-panel" role="tabpanel" aria-labelledby="case-tab-0">
+            <figure><button class="figure-button case-figure" type="button" data-figure="paper_assets/cvopd-figure-4-complete.png" data-caption="Figure 4 · Lock attention comparison" aria-label="Enlarge selected evidence figure"><img class="case-image" src="paper_assets/cvopd-figure-4-complete.png" width="1046" height="593" alt="Figure 4: Vision-OPD predicts the mailbox's dominant red; CV-OPD attends to the lock and predicts silver." loading="lazy" /><span class="expand-icon" aria-hidden="true"><i data-lucide="maximize-2"></i></span></button><figcaption class="case-source">Figure 4 · Appendix A.4, p. 15</figcaption></figure>
+            <div class="case-copy"><span class="small-label case-kicker">Evidence present</span><h3 class="case-title">The lock is silver.<br />The mailbox is red.</h3><p class="case-description">Vision-OPD follows the mailbox's dominant red color. CV-OPD focuses on the lock itself and identifies its metallic silver color.</p><div class="case-conclusion"><i data-lucide="focus"></i><p class="case-takeaway">The relevant object, not the surrounding color, should determine the answer.</p></div><p class="case-caveat">A qualitative example of attention and response behavior, not a causal proof of grounding.</p></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="resources band" id="resources">
+        <div class="container resource-inner"><div><p class="eyebrow">Paper & implementation</p><h2>CV-OPD</h2><p>Contrastive Vision On-Policy Distillation</p></div><div class="paper-actions"><a class="button button-primary" href="CV_OPD_Contrastive_Vision_OPD_ICLR_27.pdf" target="_blank" rel="noopener"><i data-lucide="file-text"></i>Paper<i data-lucide="arrow-up-right"></i></a><a class="button" href="https://github.com/HaoLin3419/Contrastive-Vision-OPD" target="_blank" rel="noopener"><i data-lucide="github"></i>Code<i data-lucide="arrow-up-right"></i></a></div></div>
+      </section>
+    </main>
+    <footer class="container"><span>CV-OPD · Research project</span><span>Figures and results from the accompanying manuscript.</span></footer>
+    <dialog class="figure-dialog" aria-label="Expanded paper figure">
+      <div class="dialog-toolbar"><p class="dialog-caption"></p><a class="icon-button dialog-original" href="paper_assets/figure-1-hires.png" target="_blank" rel="noopener" aria-label="Open original image" title="Open original image"><i data-lucide="external-link"></i></a><button class="icon-button dialog-close" type="button" aria-label="Close figure" title="Close figure"><i data-lucide="x"></i></button></div>
+      <div class="dialog-image-scroll"><img class="dialog-image" alt="" /></div>
+    </dialog>
   </body>
 </html>

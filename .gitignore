@@ -19,3 +19,9 @@ __pycache__/
 # Local secrets and environment files
 .env
 .env.*
+
+# Website-only local extraction and browser verification tools
+.tmp/pdf-tools/
+.tmp/site-tools/
+.tmp/rendered-paper/
+.tmp/website-checks/
