@@ -3,6 +3,8 @@
 
 Official implementation of **Contrastive Vision On-Policy Distillation (CV-OPD)**.
 
+🌐 **Project Page:** https://haolin3419.github.io/Contrastive-Vision-OPD/
+
 ## Overview
 
 CV-OPD is a contrastive on-policy self-distillation framework designed to improve fine-grained visual understanding and mitigate shortcut learning in vision-language models.
