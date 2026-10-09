@@ -46,8 +46,14 @@ sup, sub { line-height: 0; }
 .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--green); flex: 0 0 auto; }
 .masthead { text-align: center; padding: 56px 0 40px; }
 .masthead .eyebrow { justify-content: center; }
-h1 { font-size: 60px; line-height: 1.07; }
-h1 > span { display: block; font-size: 38px; line-height: 1.22; margin-top: 15px; }
+.masthead h1 {
+  font-size: clamp(24px, 3.1vw, 43px);
+  line-height: 1.25;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  white-space: nowrap;
+  text-align: center;
+}
 .abstract-line { margin: 22px auto; color: var(--muted); font-size: 17px; line-height: 1.7; }
 .paper-actions { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px; }
 .button { display: inline-flex; justify-content: center; align-items: center; gap: 10px; padding: 11px 18px; min-height: 45px; border: 1px solid var(--line); border-radius: 5px; font-size: 13px; font-weight: 600; background: white; }
